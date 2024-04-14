@@ -1,0 +1,11 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+    cn.addenda.component.springboot.autoconfig.IdempotenceAutoConfiguration,\
+    cn.addenda.component.springboot.autoconfig.LockAllocatorAutoConfiguration,\
+    cn.addenda.component.springboot.autoconfig.LockAutoConfiguration,\
+    cn.addenda.component.springboot.autoconfig.MybatisCommonAutoConfiguration,\
+    cn.addenda.component.springboot.autoconfig.RedissonAutoConfiguration,\
+    cn.addenda.component.springboot.autoconfig.RedisTemplateAutoConfiguration,\
+    cn.addenda.component.springboot.autoconfig.TomcatCommonAutoConfiguration,\
+    cn.addenda.component.springboot.autoconfig.TransactionHelperAutoConfiguration,\
+    cn.addenda.component.springboot.autoconfig.UserAutoConfiguration,\
+    cn.addenda.component.springboot.autoconfig.ValueResolverAutoConfiguration

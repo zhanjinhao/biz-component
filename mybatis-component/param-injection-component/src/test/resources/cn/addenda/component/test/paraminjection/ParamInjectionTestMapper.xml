@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.addenda.component.test.paraminjection.ParamInjectionMapper">
+    <resultMap type="cn.addenda.component.test.paraminjection.ParamInjectionTest" id="ParamInjectionTestMap">
+        <id property="id" column="id" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="allColumn">
+        id, nickname, age, birthday, creator, creator_name, create_tm, modifier, modifier_name, modify_tm, delete_flag
+    </sql>
+
+    <sql id="setCondition">
+        <if test="nickname != null">
+            nickname = #{nickname,jdbcType=VARCHAR},
+        </if>
+        <if test="age != null">
+            age = #{age,jdbcType=INTEGER},
+        </if>
+        <if test="birthday != null">
+            birthday = #{birthday,jdbcType=TIMESTAMP},
+        </if>
+        <if test="creator != null">
+            creator = #{creator,jdbcType=VARCHAR},
+        </if>
+        <if test="creatorName != null">
+            creator_name = #{creatorName,jdbcType=VARCHAR},
+        </if>
+        <if test="createTm != null">
+            create_tm = #{createTm,jdbcType=TIMESTAMP},
+        </if>
+        <if test="modifier != null">
+            modifier = #{modifier,jdbcType=VARCHAR},
+        </if>
+        <if test="modifierName != null">
+            modifier_name = #{modifierName,jdbcType=VARCHAR},
+        </if>
+        <if test="modifyTm != null">
+            modify_tm = #{modifyTm,jdbcType=TIMESTAMP},
+        </if>
+        <if test="deleteFlag != null">
+            delete_flag = #{deleteFlag,jdbcType=VARCHAR},
+        </if>
+    </sql>
+
+    <sql id="queryCondition">
+        <if test="id != null">
+            and id = #{id,jdbcType=INTEGER}
+        </if>
+        <if test="nickname != null">
+            and nickname = #{nickname,jdbcType=VARCHAR}
+        </if>
+        <if test="age != null">
+            and age = #{age,jdbcType=INTEGER}
+        </if>
+        <if test="birthday != null">
+            and birthday = #{birthday,jdbcType=TIMESTAMP}
+        </if>
+        <if test="creator != null">
+            and creator = #{creator,jdbcType=VARCHAR}
+        </if>
+        <if test="creatorName != null">
+            and creator_name = #{creatorName,jdbcType=VARCHAR}
+        </if>
+        <if test="createTm != null">
+            and create_tm = #{createTm,jdbcType=TIMESTAMP}
+        </if>
+        <if test="modifier != null">
+            and modifier = #{modifier,jdbcType=VARCHAR}
+        </if>
+        <if test="modifierName != null">
+            and modifier_name = #{modifierName,jdbcType=VARCHAR}
+        </if>
+        <if test="modifyTm != null">
+            and modify_tm = #{modifyTm,jdbcType=TIMESTAMP}
+        </if>
+        <if test="deleteFlag != null">
+            and delete_flag = #{deleteFlag,jdbcType=VARCHAR}
+        </if>
+    </sql>
+
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true">
+        insert into t_easy_code_test
+        <trim prefix="set" suffixOverrides=",">
+            id = #{id,jdbcType=INTEGER},
+            <include refid="setCondition"/>
+        </trim>
+    </insert>
+
+    <update id="updateById">
+        update t_easy_code_test
+        <trim prefix="set" suffixOverrides=",">
+            <include refid="setCondition"/>
+        </trim>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <delete id="deleteById">
+        delete from t_easy_code_test where id = #{id,jdbcType=INTEGER}
+    </delete>
+
+    <delete id="deleteByEntity">
+        delete from t_easy_code_test
+        <trim prefix="where" prefixOverrides="and">
+            <include refid="queryCondition"/>
+        </trim>
+    </delete>
+
+    <delete id="deleteByEntity2">
+        delete from t_easy_code_test1
+        <trim prefix="where" prefixOverrides="and">
+            <include refid="queryCondition"/>
+        </trim>
+    </delete>
+
+    <select id="queryByEntity" resultMap="ParamInjectionTestMap">
+        select
+        <include refid="allColumn"/>
+        from t_easy_code_test
+        <trim prefix="where" prefixOverrides="and">
+            <include refid="queryCondition"/>
+        </trim>
+    </select>
+
+    <select id="queryById" resultMap="ParamInjectionTestMap">
+        select
+        <include refid="allColumn"/>
+        from t_easy_code_test
+        <trim prefix="where" prefixOverrides="and">
+            id = #{id,jdbcType=INTEGER}
+        </trim>
+    </select>
+
+    <select id="queryByIdList" resultMap="ParamInjectionTestMap">
+        select
+        <include refid="allColumn"/>
+        from t_easy_code_test
+        <trim prefix="where" prefixOverrides="and">
+            id in
+            <foreach collection="idList" open="(" close=")" item="id" separator=",">
+                #{id,jdbcType=INTEGER}
+            </foreach>
+        </trim>
+    </select>
+
+    <select id="countByEntity" resultType="java.lang.Long">
+        select count(*) from t_easy_code_test
+        <trim prefix="where" prefixOverrides="and">
+            <include refid="queryCondition"/>
+        </trim>
+    </select>
+
+    <update id="update">
+        update t_easy_code_test
+        set NICKNAME = #{nickName,jdbcType=VARCHAR}, modify_tm = now(), modifier = #{modifier,jdbcType=VARCHAR},
+        modifier_name = #{modifierName,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <update id="increment">
+        update t_easy_code_test
+        set age = age + 1,
+        modify_tm = now(),
+        modifier = #{modifier,jdbcType=VARCHAR},
+        modifier_name = #{modifierName,jdbcType=VARCHAR}
+        where NICKNAME = #{nickName,jdbcType=VARCHAR}
+    </update>
+</mapper>
+
