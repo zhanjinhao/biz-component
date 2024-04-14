@@ -1,4 +1,4 @@
-package cn.addenda.component.idempotenct;
+package cn.addenda.component.idempotence;
 
 import cn.addenda.component.convention.exception.SystemException;
 import lombok.Getter;

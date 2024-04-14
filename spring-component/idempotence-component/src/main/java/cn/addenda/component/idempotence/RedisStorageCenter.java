@@ -1,4 +1,4 @@
-package cn.addenda.component.idempotenct;
+package cn.addenda.component.idempotence;
 
 import cn.addenda.component.jackson.util.JacksonUtils;
 import cn.addenda.component.jdk.util.my.MyArrayUtils;

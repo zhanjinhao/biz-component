@@ -1,4 +1,4 @@
-package cn.addenda.component.idempotenct;
+package cn.addenda.component.idempotence;
 
 import org.springframework.context.annotation.AutoProxyRegistrar;
 import org.springframework.context.annotation.ImportSelector;

@@ -1,8 +1,8 @@
 package cn.addenda.component.springboot.autoconfig;
 
-import cn.addenda.component.idempotenct.DbStorageCenter;
-import cn.addenda.component.idempotenct.IdempotenceHelper;
-import cn.addenda.component.idempotenct.RedisStorageCenter;
+import cn.addenda.component.idempotence.DbStorageCenter;
+import cn.addenda.component.idempotence.IdempotenceHelper;
+import cn.addenda.component.idempotence.RedisStorageCenter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.EnvironmentAware;

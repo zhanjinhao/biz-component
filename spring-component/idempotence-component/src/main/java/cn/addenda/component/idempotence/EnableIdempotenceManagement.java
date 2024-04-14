@@ -1,4 +1,4 @@
-package cn.addenda.component.idempotenct;
+package cn.addenda.component.idempotence;
 
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Import;

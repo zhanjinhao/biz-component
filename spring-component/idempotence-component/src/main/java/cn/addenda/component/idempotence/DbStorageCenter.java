@@ -1,4 +1,4 @@
-package cn.addenda.component.idempotenct;
+package cn.addenda.component.idempotence;
 
 import cn.addenda.component.cronclean.CronBak;
 import cn.addenda.component.jackson.util.JacksonUtils;
