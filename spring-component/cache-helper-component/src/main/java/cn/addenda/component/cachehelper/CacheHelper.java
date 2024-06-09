@@ -127,6 +127,8 @@ public class CacheHelper implements DisposableBean {
 
   private DelayQueue<DeleteTask> deleteTaskQueue;
 
+  private Thread deleteTaskConsumer;
+
   public CacheHelper(ExpiredKVCache<String, String> expiredKVCache, long ppfExpirationDetectionInterval, LockAllocator<?> lockAllocator,
                      ExecutorService cacheBuildEs, RateLimiterAllocator<?> realQueryRateLimiterAllocator, boolean useServiceException) {
     this.expiredKVCache = expiredKVCache;
@@ -180,7 +182,7 @@ public class CacheHelper implements DisposableBean {
 
   protected void initDeleteTaskConsumer() {
     deleteTaskQueue = new DelayQueue<>();
-    Thread deleteTaskThread = new Thread(() -> {
+    deleteTaskConsumer = new Thread(() -> {
       while (true) {
         DeleteTask t = null;
         try {
@@ -204,14 +206,13 @@ public class CacheHelper implements DisposableBean {
                             return null;
                           });
         } catch (RejectedExecutionException e) {
-          // todo 服务关闭的时候会触发拒绝策略。当deleteTaskQueue里的延迟任务执行完成再关闭。
           if (t != null) {
             String key = t.getKey();
             log.error(getDelayDeleteMsg(key, t, "线程池触发拒绝策略"), e);
           }
         } catch (InterruptedException e) {
           break;
-        } catch (Exception e) {
+        } catch (Throwable e) {
           if (t != null) {
             String key = t.getKey();
             log.error(getDelayDeleteMsg(key, t, "未知异常"), e);
@@ -219,9 +220,9 @@ public class CacheHelper implements DisposableBean {
         }
       }
     });
-    deleteTaskThread.setDaemon(true);
-    deleteTaskThread.setName("DeleteTaskThread");
-    deleteTaskThread.start();
+    deleteTaskConsumer.setDaemon(true);
+    deleteTaskConsumer.setName("DeleteTaskThread");
+    deleteTaskConsumer.start();
   }
 
   private String getDelayDeleteMsg(String key, DeleteTask take, String prefix) {
@@ -372,7 +373,7 @@ public class CacheHelper implements DisposableBean {
                   log.error(PPF_BUILD_CACHE_MSG, key, "超时", toDateTimeStr(l), maxCost, toDateTimeStr(start),
                           toDateTimeStr(l + maxCost), toDateTimeStr(System.currentTimeMillis()));
                 }
-              } catch (Exception e) {
+              } catch (Throwable e) {
                 log.error(PPF_BUILD_CACHE_MSG, key, "异常", toDateTimeStr(l), maxCost, toDateTimeStr(start),
                         toDateTimeStr(l + maxCost), toDateTimeStr(System.currentTimeMillis()), e);
               }
@@ -610,18 +611,40 @@ public class CacheHelper implements DisposableBean {
 
   @Override
   public void destroy() throws Exception {
+    if (deleteTaskQueue != null) {
+      deleteTaskConsumer.interrupt();
+    }
     if (cacheBuildEs != null) {
       try {
         log.info("CacheHelper-Rebuild 开始关闭。");
         cacheBuildEs.shutdown();
-        if (!cacheBuildEs.awaitTermination(1, TimeUnit.MINUTES)) {
-          log.error("CacheHelper-Rebuild 关闭后等待超过1分钟未终止：{}。", cacheBuildEs);
+        if (!cacheBuildEs.awaitTermination(30, TimeUnit.SECONDS)) {
+          log.error("CacheHelper-Rebuild 关闭后等待超过30秒未终止：{}。", cacheBuildEs);
+          cacheBuildEs.awaitTermination(30, TimeUnit.SECONDS);
         }
         log.info("CacheHelper-Rebuild 正常关闭。");
       } catch (Exception e) {
         log.error("CacheHelper-Rebuild 异常关闭：{}！", cacheBuildEs, e);
         if (e instanceof InterruptedException) {
           Thread.currentThread().interrupt();
+        }
+      }
+    }
+    executeRemainingDeleteTask();
+  }
+
+  private void executeRemainingDeleteTask() {
+    if (deleteTaskQueue == null) {
+      return;
+    }
+    DeleteTask[] array = deleteTaskQueue.toArray(new DeleteTask[]{});
+    if (array.length > 0) {
+      log.error("CacheHelper-Rebuild 已关闭，还有{}个任务未被执行！", array.length);
+      for (DeleteTask deleteTask : array) {
+        try {
+          RetryUtils.retryWhenException(() -> expiredKVCache.delete(deleteTask.getKey()), deleteTask.getKey());
+        } catch (Throwable e) {
+          log.error(getDelayDeleteMsg(deleteTask.getKey(), deleteTask, "服务关闭时延迟任务未执行！"), e);
         }
       }
     }
@@ -648,8 +671,14 @@ public class CacheHelper implements DisposableBean {
      */
     private final long start;
 
+    /**
+     * 更新数据库 + 删除缓存
+     */
     private final long delay;
 
+    /**
+     * 预计执行时间
+     */
     private final long expectedExecutionTime;
 
     @Setter
@@ -660,7 +689,7 @@ public class CacheHelper implements DisposableBean {
       this.key = key;
       this.delay = delay;
       this.since = System.currentTimeMillis();
-      this.start = System.currentTimeMillis();
+      this.start = since;
       this.expectedExecutionTime = start + delay;
     }
 
