@@ -1,5 +1,6 @@
 package cn.addenda.component.idgenerator.interceptor;
 
+import cn.addenda.component.basemybatis.util.InstanceUtils;
 import cn.addenda.component.basemybatis.util.MsIdUtils;
 import cn.addenda.component.idgenerator.IdFillingException;
 import cn.addenda.component.idgenerator.annotation.IdScope;
@@ -16,8 +17,6 @@ import org.apache.ibatis.plugin.Signature;
 import org.apache.ibatis.reflection.MetaObject;
 import org.apache.ibatis.reflection.SystemMetaObject;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Properties;
@@ -142,7 +141,7 @@ public class IdFillingInterceptor implements Interceptor {
       if (properties.containsKey(ID_GENERATOR_NAME)) {
         String idGeneratorClassName = (String) properties.get(ID_GENERATOR_NAME);
         if (idGeneratorClassName != null) {
-          idGenerator = newInstance(idGeneratorClassName);
+          idGenerator = InstanceUtils.newInstance(idGeneratorClassName, IdGenerator.class);
         }
       } else {
         String msg = String.format("[%s] 初始化失败，idGenerator不能为空！", IdFillingInterceptor.class.getName());
@@ -151,31 +150,6 @@ public class IdFillingInterceptor implements Interceptor {
     }
   }
 
-
-  private IdGenerator newInstance(String clazzName) {
-    try {
-      Class<?> aClass = Class.forName(clazzName);
-      if (!IdGenerator.class.isAssignableFrom(aClass)) {
-        String msg = String.format("[%s] 初始化失败，idGenerator的类型应该是[%s]，当前是[%s]", IdFillingInterceptor.class.getName(), IdGenerator.class.getName(), aClass);
-        throw new IdFillingException(msg);
-      }
-
-      // 如果IdGenerator存在单例方法，优先取单例方法。
-      Method[] methods = aClass.getMethods();
-      for (Method method : methods) {
-        if (method.getName().equals("getInstance") && Modifier.isStatic(method.getModifiers()) &&
-                method.getParameterCount() == 0 && IdGenerator.class.isAssignableFrom(method.getReturnType())) {
-          return (IdGenerator) method.invoke(null);
-        }
-      }
-
-      // 如果不存在单例方法，取默认构造函数
-      return (IdGenerator) aClass.newInstance();
-    } catch (Exception e) {
-      String msg = String.format("[%s] 初始化失败，idGenerator的类型应该是[%s]，当前是[%s]", IdFillingInterceptor.class.getName(), IdGenerator.class.getName(), clazzName);
-      throw new IdFillingException(msg, e);
-    }
-  }
 
   private IdScopeController extractIdScopeController(String msId) {
     return ID_SCOPE_CONTROLLER_MAP.computeIfAbsent(msId,

@@ -12,7 +12,6 @@
     <modules>
         <module>base-mybatis-component</module>
         <module>id-generator-component</module>
-        <module>param-injection-component</module>
     </modules>
     <artifactId>mybatis-component</artifactId>
 
