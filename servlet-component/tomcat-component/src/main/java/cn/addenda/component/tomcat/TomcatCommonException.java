@@ -1,6 +1,6 @@
 package cn.addenda.component.tomcat;
 
-import cn.addenda.component.convention.exception.SystemException;
+import cn.addenda.component.jdk.exception.SystemException;
 
 /**
  * @author addenda

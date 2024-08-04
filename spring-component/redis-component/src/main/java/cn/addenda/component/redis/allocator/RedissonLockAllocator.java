@@ -1,6 +1,6 @@
 package cn.addenda.component.redis.allocator;
 
-import cn.addenda.component.allocator.lock.LockAllocator;
+import cn.addenda.component.jdk.allocator.lock.LockAllocator;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 

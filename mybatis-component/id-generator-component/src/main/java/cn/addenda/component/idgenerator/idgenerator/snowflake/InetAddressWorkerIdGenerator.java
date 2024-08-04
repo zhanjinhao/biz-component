@@ -1,6 +1,6 @@
 package cn.addenda.component.idgenerator.idgenerator.snowflake;
 
-import cn.addenda.component.jdk.util.my.MyStringUtils;
+import cn.addenda.component.jdk.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.management.ManagementFactory;
@@ -67,7 +67,7 @@ public class InetAddressWorkerIdGenerator implements SnowflakeWorkerIdGenerator 
     StringBuilder mpid = new StringBuilder();
     mpid.append(datacenterId);
     String name = ManagementFactory.getRuntimeMXBean().getName();
-    if (MyStringUtils.hasText(name)) {
+    if (StringUtils.hasText(name)) {
       /*
        * GET jvmPid
        */

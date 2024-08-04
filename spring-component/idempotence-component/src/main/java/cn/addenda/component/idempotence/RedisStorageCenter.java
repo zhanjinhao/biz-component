@@ -1,7 +1,7 @@
 package cn.addenda.component.idempotence;
 
 import cn.addenda.component.jackson.util.JacksonUtils;
-import cn.addenda.component.jdk.util.my.MyArrayUtils;
+import cn.addenda.component.jdk.util.collection.ArrayUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -92,7 +92,7 @@ public class RedisStorageCenter implements StorageCenter {
 
   @Override
   public ConsumeStatus getSet(IdempotenceParamWrapper param, ConsumeStatus consumeStatus) {
-    String old = stringRedisTemplate.execute(GET_SET_SCRIPT, MyArrayUtils.asArrayList(param.getFullKey())
+    String old = stringRedisTemplate.execute(GET_SET_SCRIPT, ArrayUtils.asArrayList(param.getFullKey())
             , param.getXId(), param.getConsumeMode().name(), consumeStatus.name(), String.valueOf(param.getTtlSecs()));
     if (old == null) {
       return null;
@@ -106,12 +106,12 @@ public class RedisStorageCenter implements StorageCenter {
   }
 
   private boolean doCasStatus1(IdempotenceParamWrapper param, ConsumeStatus expected, ConsumeStatus consumeStatus) {
-    return Boolean.TRUE.equals(stringRedisTemplate.execute(DO_CAS_STATUS_1_SCRIPT, MyArrayUtils.asArrayList(param.getFullKey()),
+    return Boolean.TRUE.equals(stringRedisTemplate.execute(DO_CAS_STATUS_1_SCRIPT, ArrayUtils.asArrayList(param.getFullKey()),
             param.getXId(), expected.name(), consumeStatus.name(), String.valueOf(param.getTtlSecs())));
   }
 
   private boolean doCasStatus2(IdempotenceParamWrapper param, ConsumeStatus expected, ConsumeStatus consumeStatus) {
-    return Boolean.TRUE.equals(stringRedisTemplate.execute(DO_CAS_STATUS_2_SCRIPT, MyArrayUtils.asArrayList(param.getFullKey()),
+    return Boolean.TRUE.equals(stringRedisTemplate.execute(DO_CAS_STATUS_2_SCRIPT, ArrayUtils.asArrayList(param.getFullKey()),
             param.getXId(), expected.name(), consumeStatus.name(), String.valueOf(param.getTtlSecs())));
   }
 
@@ -128,7 +128,7 @@ public class RedisStorageCenter implements StorageCenter {
   @Override
   public boolean delete(IdempotenceParamWrapper param) {
     return Boolean.TRUE.equals(stringRedisTemplate.execute(
-            DELETE_SCRIPT, MyArrayUtils.asArrayList(param.getFullKey()), param.getXId()));
+            DELETE_SCRIPT, ArrayUtils.asArrayList(param.getFullKey()), param.getXId()));
   }
 
 }

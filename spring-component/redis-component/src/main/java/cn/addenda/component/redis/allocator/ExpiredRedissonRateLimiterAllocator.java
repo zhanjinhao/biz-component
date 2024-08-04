@@ -1,7 +1,7 @@
 package cn.addenda.component.redis.allocator;
 
-import cn.addenda.component.allocator.AllocatorException;
-import cn.addenda.component.allocator.ExpiredAllocator;
+import cn.addenda.component.jdk.allocator.AllocatorException;
+import cn.addenda.component.jdk.allocator.ExpiredAllocator;
 import cn.addenda.component.redis.ratelimiter.ExpiredRedissonRateLimiter;
 import cn.addenda.component.redis.ratelimiter.RRateLimiterWrapper;
 import org.redisson.Redisson;

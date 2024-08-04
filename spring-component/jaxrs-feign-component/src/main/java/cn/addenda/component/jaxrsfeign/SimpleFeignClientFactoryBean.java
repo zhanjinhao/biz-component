@@ -1,7 +1,7 @@
 package cn.addenda.component.jaxrsfeign;
 
 import cn.addenda.component.basaspring.context.ValueResolverHelper;
-import cn.addenda.component.convention.result.Result;
+import cn.addenda.component.jdk.result.Result;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageInfo;
 import feign.*;

@@ -1,7 +1,7 @@
 package cn.addenda.component.cachehelper;
 
 import cn.addenda.component.jackson.deserialzer.LocalDateTimeStrDeSerializer;
-import cn.addenda.component.jackson.serialzer.LocalDateTimeStrSerializer;
+import cn.addenda.component.jackson.serialzer.LocalDateTimeStryMdHmsSerializer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.*;
@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class CacheData<T> {
 
-  @JsonSerialize(using = LocalDateTimeStrSerializer.class)
+  @JsonSerialize(using = LocalDateTimeStryMdHmsSerializer.class)
   @JsonDeserialize(using = LocalDateTimeStrDeSerializer.class)
   private LocalDateTime expireTime;
 

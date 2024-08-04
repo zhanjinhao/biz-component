@@ -14,8 +14,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.sql.DataSource;
 
-import cn.addenda.component.jdk.util.IterableUtils;
-import cn.addenda.component.jdk.util.my.MyArrayUtils;
+import cn.addenda.component.jdk.util.collection.ArrayUtils;
+import cn.addenda.component.jdk.util.collection.IterableUtils;
 import cn.addenda.component.jdk.util.sql.ConnectionUtils;
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLExpr;
@@ -60,7 +60,7 @@ public class CronBak extends CronClean implements InitializingBean {
   private ThreadPoolTaskScheduler threadPoolTaskScheduler;
 
   public CronBak(DataSource dataSource, String querySql, Integer oneBatch, String primaryKeyColumn, String bakTableName, String cron) {
-    this(dataSource, querySql, oneBatch, MyArrayUtils.asHashSet(primaryKeyColumn), bakTableName, cron);
+    this(dataSource, querySql, oneBatch, ArrayUtils.asHashSet(primaryKeyColumn), bakTableName, cron);
     Assert.notNull(primaryKeyColumn, "`primaryKeyColumn` can not be null!");
   }
 

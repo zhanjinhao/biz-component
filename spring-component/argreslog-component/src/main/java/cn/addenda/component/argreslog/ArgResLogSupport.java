@@ -1,8 +1,8 @@
 package cn.addenda.component.argreslog;
 
 import cn.addenda.component.jackson.util.JacksonUtils;
+import cn.addenda.component.jdk.lambda.TSupplier;
 import cn.addenda.component.jdk.util.StackTraceUtils;
-import cn.addenda.component.lambda.TSupplier;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 

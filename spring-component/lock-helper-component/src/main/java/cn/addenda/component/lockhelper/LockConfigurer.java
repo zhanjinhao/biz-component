@@ -1,6 +1,6 @@
 package cn.addenda.component.lockhelper;
 
-import cn.addenda.component.allocator.lock.LockAllocator;
+import cn.addenda.component.jdk.allocator.lock.LockAllocator;
 
 import java.util.concurrent.locks.Lock;
 

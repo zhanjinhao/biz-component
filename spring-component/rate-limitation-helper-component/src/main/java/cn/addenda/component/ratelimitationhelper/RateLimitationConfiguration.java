@@ -1,6 +1,6 @@
 package cn.addenda.component.ratelimitationhelper;
 
-import cn.addenda.component.allocator.NamedExpiredAllocator;
+import cn.addenda.component.jdk.allocator.NamedExpiredAllocator;
 import cn.addenda.component.ratelimiter.RateLimiter;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;

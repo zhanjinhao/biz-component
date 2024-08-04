@@ -1,7 +1,7 @@
 package cn.addenda.component.tomcat;
 
-import cn.addenda.component.convention.result.Result;
 import cn.addenda.component.jackson.util.JacksonUtils;
+import cn.addenda.component.jdk.result.Result;
 import org.apache.catalina.Container;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.Response;

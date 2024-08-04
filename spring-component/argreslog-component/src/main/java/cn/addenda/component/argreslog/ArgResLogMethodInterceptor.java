@@ -1,6 +1,6 @@
 package cn.addenda.component.argreslog;
 
-import cn.addenda.component.convention.util.ExceptionUtils;
+import cn.addenda.component.jdk.util.ExceptionUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;

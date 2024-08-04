@@ -1,11 +1,11 @@
 package cn.addenda.component.lockhelper;
 
-import cn.addenda.component.allocator.lock.LockAllocator;
 import cn.addenda.component.basaspring.context.ValueResolverHelper;
 import cn.addenda.component.basaspring.util.SpELUtils;
-import cn.addenda.component.convention.exception.component.ComponentServiceException;
+import cn.addenda.component.jdk.allocator.lock.LockAllocator;
+import cn.addenda.component.jdk.exception.component.ComponentServiceException;
+import cn.addenda.component.jdk.lambda.TSupplier;
 import cn.addenda.component.jdk.util.TimeUnitUtils;
-import cn.addenda.component.lambda.TSupplier;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;

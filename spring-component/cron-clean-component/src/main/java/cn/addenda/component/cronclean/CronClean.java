@@ -2,7 +2,7 @@ package cn.addenda.component.cronclean;
 
 import java.util.Date;
 
-import cn.addenda.component.jdk.util.my.MyDateUtils;
+import cn.addenda.component.jdk.util.DateUtils;
 import lombok.Getter;
 import org.springframework.scheduling.support.CronSequenceGenerator;
 import org.springframework.util.Assert;
@@ -35,10 +35,10 @@ public abstract class CronClean {
     Date next2 = cronSequenceGenerator.next(next1);
     Date next3 = cronSequenceGenerator.next(next2);
     return String.format("当前时间是[%s]。前三次执行时间是[%s]、[%s]、[%s]。",
-            MyDateUtils.format(MyDateUtils.dateToLocalDateTime(now), MyDateUtils.FULL_FORMATTER),
-            MyDateUtils.format(MyDateUtils.dateToLocalDateTime(next1), MyDateUtils.FULL_FORMATTER),
-            MyDateUtils.format(MyDateUtils.dateToLocalDateTime(next2), MyDateUtils.FULL_FORMATTER),
-            MyDateUtils.format(MyDateUtils.dateToLocalDateTime(next3), MyDateUtils.FULL_FORMATTER));
+            DateUtils.format(DateUtils.dateToLocalDateTime(now), DateUtils.yMdHmsS_FORMATTER),
+            DateUtils.format(DateUtils.dateToLocalDateTime(next1), DateUtils.yMdHmsS_FORMATTER),
+            DateUtils.format(DateUtils.dateToLocalDateTime(next2), DateUtils.yMdHmsS_FORMATTER),
+            DateUtils.format(DateUtils.dateToLocalDateTime(next3), DateUtils.yMdHmsS_FORMATTER));
   }
 
   protected String removeGrave(String str) {

@@ -1,6 +1,6 @@
 package cn.addenda.component.lockhelper;
 
-import cn.addenda.component.convention.util.ExceptionUtils;
+import cn.addenda.component.jdk.util.ExceptionUtils;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.support.AopUtils;

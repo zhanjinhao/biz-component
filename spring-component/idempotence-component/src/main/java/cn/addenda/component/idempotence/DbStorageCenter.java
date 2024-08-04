@@ -2,8 +2,8 @@ package cn.addenda.component.idempotence;
 
 import cn.addenda.component.cronclean.CronBak;
 import cn.addenda.component.jackson.util.JacksonUtils;
+import cn.addenda.component.jdk.util.DateUtils;
 import cn.addenda.component.jdk.util.sql.ConnectionUtils;
-import cn.addenda.component.jdk.util.my.MyDateUtils;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -305,7 +305,7 @@ public class DbStorageCenter implements StorageCenter, InitializingBean, Applica
       String consumeStatus = resultSet.getString("consume_status");
       storageCenterEntity.setConsumeStatus(consumeStatus == null ? null : ConsumeStatus.valueOf(consumeStatus));
       Timestamp expireTime = resultSet.getTimestamp("expire_time");
-      storageCenterEntity.setExpireTime(expireTime == null ? null : MyDateUtils.timestampToLocalDateTime(expireTime.getTime()));
+      storageCenterEntity.setExpireTime(expireTime == null ? null : DateUtils.timestampToLocalDateTime(expireTime.getTime()));
       storageCenterEntityList.add(storageCenterEntity);
     }
 

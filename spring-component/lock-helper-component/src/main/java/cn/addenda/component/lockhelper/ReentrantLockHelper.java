@@ -1,6 +1,6 @@
 package cn.addenda.component.lockhelper;
 
-import cn.addenda.component.allocator.lock.ReentrantLockAllocator;
+import cn.addenda.component.jdk.allocator.lock.ReentrantLockAllocator;
 
 /**
  * @author addenda

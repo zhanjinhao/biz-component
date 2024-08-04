@@ -1,8 +1,8 @@
 package cn.addenda.component.ratelimitationhelper;
 
-import cn.addenda.component.allocator.NamedExpiredAllocator;
 import cn.addenda.component.basaspring.util.AnnotationUtils;
-import cn.addenda.component.convention.util.ExceptionUtils;
+import cn.addenda.component.jdk.allocator.NamedExpiredAllocator;
+import cn.addenda.component.jdk.util.ExceptionUtils;
 import cn.addenda.component.ratelimiter.RateLimiter;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;

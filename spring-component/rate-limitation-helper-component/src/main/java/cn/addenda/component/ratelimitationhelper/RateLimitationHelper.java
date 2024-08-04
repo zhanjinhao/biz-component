@@ -1,10 +1,10 @@
 package cn.addenda.component.ratelimitationhelper;
 
-import cn.addenda.component.allocator.NamedExpiredAllocator;
-import cn.addenda.component.convention.util.ExceptionUtils;
-import cn.addenda.component.lambda.FunctionConverter;
-import cn.addenda.component.lambda.TRunnable;
-import cn.addenda.component.lambda.TSupplier;
+import cn.addenda.component.jdk.allocator.NamedExpiredAllocator;
+import cn.addenda.component.jdk.lambda.FunctionConverter;
+import cn.addenda.component.jdk.lambda.TRunnable;
+import cn.addenda.component.jdk.lambda.TSupplier;
+import cn.addenda.component.jdk.util.ExceptionUtils;
 import cn.addenda.component.ratelimiter.RateLimiter;
 
 import java.util.List;

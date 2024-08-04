@@ -1,6 +1,6 @@
 package cn.addenda.component.springboot.autoconfig;
 
-import cn.addenda.component.allocator.lock.ReentrantLockAllocator;
+import cn.addenda.component.jdk.allocator.lock.ReentrantLockAllocator;
 import cn.addenda.component.redis.allocator.RedissonLockAllocator;
 import org.redisson.api.RedissonClient;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;

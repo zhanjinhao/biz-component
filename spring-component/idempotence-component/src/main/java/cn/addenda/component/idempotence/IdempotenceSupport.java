@@ -2,14 +2,14 @@ package cn.addenda.component.idempotence;
 
 import cn.addenda.component.basaspring.context.ValueResolverHelper;
 import cn.addenda.component.basaspring.util.SpELUtils;
-import cn.addenda.component.convention.exception.component.ComponentServiceException;
-import cn.addenda.component.convention.exception.ServiceException;
 import cn.addenda.component.jackson.util.JacksonUtils;
+import cn.addenda.component.jdk.exception.ServiceException;
+import cn.addenda.component.jdk.exception.component.ComponentServiceException;
+import cn.addenda.component.jdk.lambda.TBiFunction;
+import cn.addenda.component.jdk.lambda.TSupplier;
 import cn.addenda.component.jdk.util.RetryUtils;
 import cn.addenda.component.jdk.util.SleepUtils;
 import cn.addenda.component.jdk.util.TimeUnitUtils;
-import cn.addenda.component.lambda.TBiFunction;
-import cn.addenda.component.lambda.TSupplier;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;

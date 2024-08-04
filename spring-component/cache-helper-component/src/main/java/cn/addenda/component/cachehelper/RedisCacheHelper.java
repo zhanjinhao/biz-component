@@ -1,6 +1,6 @@
 package cn.addenda.component.cachehelper;
 
-import cn.addenda.component.allocator.lock.LockAllocator;
+import cn.addenda.component.jdk.allocator.lock.LockAllocator;
 import cn.addenda.component.ratelimiter.allcator.RateLimiterAllocator;
 import org.springframework.data.redis.core.StringRedisTemplate;
 

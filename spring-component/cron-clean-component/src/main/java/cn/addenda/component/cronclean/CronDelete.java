@@ -1,6 +1,6 @@
 package cn.addenda.component.cronclean;
 
-import cn.addenda.component.jdk.util.IterableUtils;
+import cn.addenda.component.jdk.util.collection.IterableUtils;
 import cn.addenda.component.jdk.util.sql.ConnectionUtils;
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLExpr;
