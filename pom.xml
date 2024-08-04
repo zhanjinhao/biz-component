@@ -36,8 +36,6 @@
     <redisson-spring-boot-starter.version>3.17.1</redisson-spring-boot-starter.version>
     <transmittable-thread-local.version>2.14.2</transmittable-thread-local.version>
     <druid-version>1.2.8</druid-version>
-    <feign.verson>11.10</feign.verson>
-    <feign-form.version>3.8.0</feign-form.version>
     <!-- tool end -->
   </properties>
 
@@ -96,36 +94,6 @@
         <version>${druid-version}</version>
       </dependency>
 
-      <dependency>
-        <groupId>io.github.openfeign</groupId>
-        <artifactId>feign-core</artifactId>
-        <version>${feign.verson}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.github.openfeign</groupId>
-        <artifactId>feign-jackson</artifactId>
-        <version>${feign.verson}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.github.openfeign</groupId>
-        <artifactId>feign-slf4j</artifactId>
-        <version>${feign.verson}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.github.openfeign</groupId>
-        <artifactId>feign-jaxrs</artifactId>
-        <version>${feign.verson}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.github.openfeign</groupId>
-        <artifactId>feign-httpclient</artifactId>
-        <version>${feign.verson}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.github.openfeign.form</groupId>
-        <artifactId>feign-form</artifactId>
-        <version>${feign-form.version}</version>
-      </dependency>
     </dependencies>
 
   </dependencyManagement>

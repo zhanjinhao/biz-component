@@ -17,7 +17,6 @@
         <module>cron-clean-component</module>
         <module>dynamic-datasource-component</module>
         <module>idempotence-component</module>
-        <module>jaxrs-feign-component</module>
         <module>lock-helper-component</module>
         <module>rate-limitation-helper-component</module>
         <module>redis-component</module>
