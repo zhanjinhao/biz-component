@@ -343,7 +343,7 @@ public class CacheHelper implements DisposableBean {
     else {
       String lockKey = getLockKey(key);
       // 3.1 命中，需要先把json反序列化为对象
-      CacheData<R> cacheData = JacksonUtils.toObj(cachedJson, TypeFactoryUtils.constructParametricType(CacheHelper.class, rType));
+      CacheData<R> cacheData = JacksonUtils.toObj(cachedJson, TypeFactoryUtils.constructParametricType(CacheData.class, rType));
       LocalDateTime expireTime = cacheData.getExpireTime();
       R data = cacheData.getData();
       // 4.1 判断是否过期，未过期，直接返回

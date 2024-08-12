@@ -50,6 +50,7 @@ public class CacheHelperTest {
     service.insertUser(User.newUser("Q1"));
 
     User userFromDb1 = queryByPpf("Q1");
+    userFromDb1 = queryByPpf("Q1");
     log.info(userFromDb1 != null ? userFromDb1.toString() : null);
 
     updateUserName("Q1", "我被修改了！");
