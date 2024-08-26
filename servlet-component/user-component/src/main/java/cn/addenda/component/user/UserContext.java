@@ -16,6 +16,8 @@ import java.util.function.Supplier;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class UserContext {
 
+  private static final String ADDENDA = "addenda";
+
   private static final ThreadLocal<Deque<UserInfo>> USER_THREAD_LOCAL = new TransmittableThreadLocal<>();
 
   /**
@@ -39,6 +41,13 @@ public final class UserContext {
    */
   public static String getUserId() {
     Deque<UserInfo> userInfoDeque = USER_THREAD_LOCAL.get();
+    if (userInfoDeque == null) {
+      return ADDENDA;
+    }
+    UserInfo peek = userInfoDeque.peek();
+    if (peek == null) {
+      return ADDENDA;
+    }
     return userInfoDeque.peek().getUserId();
   }
 
@@ -49,6 +58,13 @@ public final class UserContext {
    */
   public static String getUsername() {
     Deque<UserInfo> userInfoDeque = USER_THREAD_LOCAL.get();
+    if (userInfoDeque == null) {
+      return ADDENDA;
+    }
+    UserInfo peek = userInfoDeque.peek();
+    if (peek == null) {
+      return ADDENDA;
+    }
     return userInfoDeque.peek().getUsername();
   }
 
@@ -57,6 +73,9 @@ public final class UserContext {
    */
   public static UserInfo getUser() {
     Deque<UserInfo> userInfoDeque = USER_THREAD_LOCAL.get();
+    if (userInfoDeque == null) {
+      return new UserInfo(ADDENDA, ADDENDA);
+    }
     return userInfoDeque.peek();
   }
 
