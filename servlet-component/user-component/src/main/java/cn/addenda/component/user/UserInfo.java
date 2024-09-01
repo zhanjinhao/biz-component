@@ -9,7 +9,6 @@ import java.util.Objects;
  */
 @Setter
 @Getter
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -36,5 +35,10 @@ public class UserInfo {
   @Override
   public int hashCode() {
     return Objects.hash(userId, username);
+  }
+
+  @Override
+  public String toString() {
+    return username + "(" + userId + ")";
   }
 }
