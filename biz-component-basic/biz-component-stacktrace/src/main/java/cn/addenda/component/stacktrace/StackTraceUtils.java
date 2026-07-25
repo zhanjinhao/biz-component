@@ -53,8 +53,15 @@ public class StackTraceUtils {
   }
 
   /**
-   * @param useSimpleClassName 是否按简写的类名输出
-   * @param excludes           全类名
+   * 获取调用者信息，返回格式：{@code ClassName#MethodName}
+   * <p>如果 {@code useSimpleClassName} 为 {@code true}，则类名不含包名，只输出简写的类名。
+   *
+   * @param useSimpleClassName           true 表示简写类名（仅类名，不含包路径），false 表示全限定名
+   * @param ifExcludeLambda              true 则跳过 lambda 表达式生成的栈帧
+   * @param ifExcludeAnonymousInnerClass true 则跳过匿名内部类的栈帧
+   * @param excludes                     额外需要排除的类/方法标识（格式见 {@link IdentifierMatcherFactory}）
+   * @return 调用者信息，格式：{@code ClassName#MethodName}
+   * @see #getDetailedCallerInfo(boolean, boolean, boolean, String...)
    */
   public static String getCallerInfo(
           boolean useSimpleClassName, boolean ifExcludeLambda, boolean ifExcludeAnonymousInnerClass, String... excludes) {
@@ -84,8 +91,16 @@ public class StackTraceUtils {
   }
 
   /**
-   * @param useSimpleClassName 是否按简写的类名输出
-   * @param excludes           全类名
+   * 获取详细的调用者信息，返回格式：{@code ClassName#MethodName of FileName:LineNumber}
+   * <p>相比 {@link #getCallerInfo}，额外包含文件名和行号，可精确到代码行。
+   * <p>如果 {@code useSimpleClassName} 为 {@code true}，则类名不含包名，只输出简写的类名。
+   *
+   * @param useSimpleClassName           true 表示简写类名（仅类名，不含包路径），false 表示全限定名
+   * @param ifExcludeLambda              true 则跳过 lambda 表达式生成的栈帧
+   * @param ifExcludeAnonymousInnerClass true 则跳过匿名内部类的栈帧
+   * @param excludes                     额外需要排除的类/方法标识（格式见 {@link IdentifierMatcherFactory}）
+   * @return 详细的调用者信息，格式：{@code ClassName#MethodName of FileName:LineNumber}
+   * @see #getCallerInfo(boolean, boolean, boolean, String...)
    */
   public static String getDetailedCallerInfo(
           boolean useSimpleClassName, boolean ifExcludeLambda, boolean ifExcludeAnonymousInnerClass, String... excludes) {
