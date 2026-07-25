@@ -1,6 +1,7 @@
 package cn.addenda.component.stacktrace.test;
 
 import cn.addenda.component.stacktrace.IdentifierMatcherFactory;
+import cn.addenda.component.stacktrace.StackTraceException;
 import cn.addenda.component.stacktrace.StackTraceUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -9,7 +10,7 @@ class StackTraceUtilsMethodTest {
 
   @Test
   void test1() {
-    Assertions.assertEquals("StackTraceUtilsMethodTest#test2 of StackTraceUtilsMethodTest.java:16", test2());
+    Assertions.assertEquals("StackTraceUtilsMethodTest#test2 of StackTraceUtilsMethodTest.java:17", test2());
   }
 
   private String test2() {
@@ -19,7 +20,7 @@ class StackTraceUtilsMethodTest {
   @Test
   void testGetDetailedCallerInfoWithoutExcludes() {
     String s = directHelper();
-    Assertions.assertEquals("StackTraceUtilsMethodTest#directHelper of StackTraceUtilsMethodTest.java:26", s);
+    Assertions.assertEquals("StackTraceUtilsMethodTest#directHelper of StackTraceUtilsMethodTest.java:27", s);
   }
 
   private String directHelper() {
@@ -29,7 +30,7 @@ class StackTraceUtilsMethodTest {
   @Test
   void testWithMultipleExcludes() {
     String s = helperA();
-    Assertions.assertEquals("StackTraceUtilsMethodTest#helperA of StackTraceUtilsMethodTest.java:36", s);
+    Assertions.assertEquals("StackTraceUtilsMethodTest#helperA of StackTraceUtilsMethodTest.java:37", s);
   }
 
   private String helperA() {
@@ -44,7 +45,7 @@ class StackTraceUtilsMethodTest {
   @Test
   void testWithNullInExcludes() {
     String s = helperC();
-    Assertions.assertEquals("StackTraceUtilsMethodTest#helperC of StackTraceUtilsMethodTest.java:51", s);
+    Assertions.assertEquals("StackTraceUtilsMethodTest#helperC of StackTraceUtilsMethodTest.java:52", s);
   }
 
   private String helperC() {
@@ -54,6 +55,43 @@ class StackTraceUtilsMethodTest {
   private String helperD() {
     return StackTraceUtils.getDetailedCallerInfo(true, false, false,
             null, IdentifierMatcherFactory.withHash(StackTraceUtilsMethodTest.class, "helperD"));
+  }
+
+  @Test
+  void testGetCallerInfoWithExcludes() {
+    String result = callerHelper();
+    Assertions.assertTrue(result.startsWith("StackTraceUtilsMethodTest"));
+    Assertions.assertTrue(result.contains("#callerHelper"));
+    Assertions.assertFalse(result.contains("callerInner"));
+  }
+
+  private String callerHelper() {
+    return callerInner();
+  }
+
+  private String callerInner() {
+    return StackTraceUtils.getCallerInfo(
+            IdentifierMatcherFactory.withHash(StackTraceUtilsMethodTest.class, "callerInner"));
+  }
+
+  @Test
+  void testGetCallerInfoFullClassName() {
+    String result = fullNameHelper();
+    Assertions.assertTrue(result.startsWith("cn.addenda.component.stacktrace.test.StackTraceUtilsMethodTest"));
+    Assertions.assertFalse(result.startsWith("StackTraceUtilsMethodTest"));
+  }
+
+  private String fullNameHelper() {
+    return StackTraceUtils.getCallerInfo(false, false, false);
+  }
+
+  @Test
+  void testAllElementsExcludedThrowsException() {
+    Assertions.assertThrows(StackTraceException.class, this::allExcludedHelper);
+  }
+
+  private String allExcludedHelper() {
+    return StackTraceUtils.getCallerInfo("java.", "org.", "sun.", "cn.addenda", "jdk.");
   }
 
   private String test3() {
