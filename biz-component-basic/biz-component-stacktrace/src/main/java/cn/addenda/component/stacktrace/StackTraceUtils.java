@@ -10,7 +10,6 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.*;
-import java.util.regex.Pattern;
 
 /**
  * @author addenda
@@ -21,8 +20,6 @@ public class StackTraceUtils {
 
   @Getter
   private static final Set<IdentifierMatcher> defaultExcludeSet;
-
-  private static final Pattern ANONYMOUS_INNER_CLASS_PATTERN = Pattern.compile("\\$\\d+");
 
   private static final String EXCLUDED_PATH = "META-INF/biz-component-stacktrace.excluded";
 
@@ -158,7 +155,7 @@ public class StackTraceUtils {
         continue;
       }
       String className = stackTraceElement.getClassName();
-      if (ifExcludeAnonymousInnerClass && ANONYMOUS_INNER_CLASS_PATTERN.matcher(className).find()) {
+      if (ifExcludeAnonymousInnerClass && isAnonymousInnerClass(className)) {
         continue;
       }
       boolean flag = IdentifierMatcherFactory.match(excludeSet, stackTraceElement);
@@ -199,6 +196,15 @@ public class StackTraceUtils {
 
   private static String extractSimpleClassName(String className) {
     return className.substring(className.lastIndexOf('.') + 1);
+  }
+
+  private static boolean isAnonymousInnerClass(String className) {
+    for (int i = 0; i < className.length() - 1; i++) {
+      if (className.charAt(i) == '$' && Character.isDigit(className.charAt(i + 1))) {
+        return true;
+      }
+    }
+    return false;
   }
 
 }
