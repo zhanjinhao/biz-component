@@ -7,16 +7,10 @@
     <groupId>cn.addenda</groupId>
     <artifactId>biz-component</artifactId>
     <version>3.0-SNAPSHOT</version>
+    <relativePath>../../pom.xml</relativePath>
   </parent>
 
-  <artifactId>biz-component-basic</artifactId>
-  <packaging>pom</packaging>
-
-  <!-- 决定当父模块执行 mvn 命令时，会一起构建哪些模块，影响 reactor（ Maven 在一次构建中要处理的所有模块的集合） 构建顺序 -->
-  <modules>
-    <module>biz-component-stacktrace</module>
-    <module>biz-component-common</module>
-  </modules>
+  <artifactId>biz-component-common</artifactId>
 
   <properties>
     <maven.compiler.source>8</maven.compiler.source>
@@ -31,9 +25,24 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>cn.addenda</groupId>
-      <artifactId>biz-component-common</artifactId>
-      <version>${project.version}</version>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jsr310</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jdk8</artifactId>
     </dependency>
   </dependencies>
 
