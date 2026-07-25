@@ -1,0 +1,15 @@
+package cn.addenda.component.stacktrace.test;
+
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Test;
+
+@Slf4j
+class ExceptionTest {
+
+  @Test
+  void test1() {
+    RuntimeException runtimeException = new RuntimeException();
+    runtimeException.printStackTrace();
+  }
+
+}

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>cn.addenda</groupId>
+    <artifactId>biz-component</artifactId>
+    <version>3.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>biz-component-basic</artifactId>
+  <packaging>pom</packaging>
+
+  <!-- 决定当父模块执行 mvn 命令时，会一起构建哪些模块，影响 reactor（ Maven 在一次构建中要处理的所有模块的集合） 构建顺序 -->
+  <modules>
+    <module>biz-component-stacktrace</module>
+  </modules>
+
+  <properties>
+    <maven.compiler.source>8</maven.compiler.source>
+    <maven.compiler.target>8</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>cn.addenda</groupId>
+      <artifactId>biz-component-stacktrace</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
+
+</project>
