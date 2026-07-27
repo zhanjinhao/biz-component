@@ -57,14 +57,24 @@ public class ExecuteOnceFunction<T, R> implements Function<T, R> {
 
   @Override
   public String toString() {
+    int count;
+    synchronized (this) {
+      count = executedMap.size();
+    }
     return "ExecuteOnceFunction{" +
             "function=" + function +
             ", cacheNull=" + cacheNull +
+            ", executedCount=" + count +
             '}';
   }
 
   public String toString(T key) {
-    boolean contains = executedMap.containsKey(key);
+    boolean contains;
+    R value;
+    synchronized (this) {
+      contains = executedMap.containsKey(key);
+      value = resultMap.get(key);
+    }
     StringBuilder sb = new StringBuilder();
     sb.append("ExecuteOnceFunction{")
             .append("function=").append(function)
@@ -76,7 +86,6 @@ public class ExecuteOnceFunction<T, R> implements Function<T, R> {
     }
     sb.append(", contained=").append(contains);
     if (contains) {
-      R value = resultMap.get(key);
       sb.append(", result=");
       if (jacksonToString) {
         sb.append(JacksonUtils.toStr(value));

@@ -108,7 +108,16 @@ class ExecuteOnceFunctionTest {
     ExecuteOnceFunction<String, String> f = ExecuteOnceFunction.of(s -> s);
     String s = f.toString();
     Assertions.assertTrue(s.contains("ExecuteOnceFunction{function=cn.addenda.component.common.test.lambda.executeonce.ExecuteOnceFunctionTest$$Lambda$"));
-    Assertions.assertTrue(s.contains(", cacheNull=true}"));
+    Assertions.assertTrue(s.contains(", cacheNull=true, executedCount=0}"));
+  }
+
+  @Test
+  void testToString_AfterExecute() {
+    ExecuteOnceFunction<String, Integer> f = ExecuteOnceFunction.of(String::length);
+    f.apply("hello");
+    f.apply("world");
+    String s = f.toString();
+    Assertions.assertTrue(s.contains(", executedCount=2}"));
   }
 
   @Test
