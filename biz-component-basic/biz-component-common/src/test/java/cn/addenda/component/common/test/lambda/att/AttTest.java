@@ -1,12 +1,18 @@
 package cn.addenda.component.common.test.lambda.att;
 
+import cn.addenda.component.common.lambda.att.AttBiConsumer;
+import cn.addenda.component.common.lambda.att.AttBiFunction;
 import cn.addenda.component.common.lambda.att.AttCallable;
+import cn.addenda.component.common.lambda.att.AttConsumer;
 import cn.addenda.component.common.lambda.att.AttFunction;
 import cn.addenda.component.common.lambda.att.AttRunnable;
 import cn.addenda.component.common.lambda.att.AttSupplier;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -370,5 +376,197 @@ class AttTest {
     Assertions.assertTrue(s.contains("\"value\""));
     Assertions.assertTrue(s.contains("\"num\""));
     Assertions.assertTrue(s.contains("42"));
+  }
+
+  // ==================== AttConsumer ====================
+
+  @Test
+  void testConsumer_Accept() {
+    AtomicBoolean called = new AtomicBoolean(false);
+    AttConsumer<String, String> c = AttConsumer.of("ctx", s -> called.set(true));
+    c.accept("test");
+    Assertions.assertTrue(called.get());
+  }
+
+  @Test
+  void testConsumer_Accept_Throws() {
+    RuntimeException ex = new RuntimeException("test");
+    AttConsumer<String, String> c = AttConsumer.of("ctx", s -> { throw ex; });
+    RuntimeException thrown = Assertions.assertThrows(RuntimeException.class, () -> c.accept("x"));
+    Assertions.assertSame(ex, thrown);
+  }
+
+  @Test
+  void testConsumer_GetAtt() {
+    AttConsumer<String, String> c = AttConsumer.of("ctx", s -> {});
+    Assertions.assertEquals("ctx", c.getAtt());
+  }
+
+  @Test
+  void testConsumer_GetConsumer() {
+    Consumer<String> delegate = s -> {};
+    AttConsumer<String, String> c = AttConsumer.of("ctx", delegate);
+    Assertions.assertSame(delegate, c.getConsumer());
+  }
+
+  @Test
+  void testConsumer_NullAtt() {
+    AttConsumer<String, String> c = AttConsumer.of(null, s -> {});
+    Assertions.assertNull(c.getAtt());
+    Assertions.assertTrue(c.toString().contains(", att=null"));
+  }
+
+  @Test
+  void testConsumer_ToString() {
+    AttConsumer<String, String> c = AttConsumer.of("ctx", s -> {});
+    String s = c.toString();
+    Assertions.assertTrue(s.contains("AttConsumer{consumer=cn.addenda.component.common.test.lambda.att.AttTest$$Lambda"));
+    Assertions.assertTrue(s.contains(", att=ctx}"));
+  }
+
+  @Test
+  void testConsumer_ToString_JacksonFalse() {
+    AttConsumer<String, String> c = AttConsumer.of("ctx", s -> {}, false);
+    String s = c.toString();
+    Assertions.assertTrue(s.contains("AttConsumer{consumer=cn.addenda.component.common.test.lambda.att.AttTest$$Lambda"));
+    Assertions.assertTrue(s.contains(", att=ctx}"));
+  }
+
+  @Test
+  void testConsumer_ToString_JacksonTrue() {
+    AttConsumer<String, String> c = AttConsumer.of("ctx", s -> {}, true);
+    String s = c.toString();
+    Assertions.assertTrue(s.contains("AttConsumer{consumer=cn.addenda.component.common.test.lambda.att.AttTest$$Lambda"));
+    Assertions.assertTrue(s.contains(", att=\"ctx\"}"));
+  }
+
+  // ==================== AttBiFunction ====================
+
+  @Test
+  void testBiFunction_Apply_ReturnsValue() {
+    AttBiFunction<String, Integer, Integer, Integer> f = AttBiFunction.of("ctx", Integer::sum);
+    Assertions.assertEquals(7, f.apply(3, 4));
+  }
+
+  @Test
+  void testBiFunction_Apply_ReturnsNull() {
+    AttBiFunction<String, String, String, Object> f = AttBiFunction.of("ctx", (a, b) -> null);
+    Assertions.assertNull(f.apply("a", "b"));
+  }
+
+  @Test
+  void testBiFunction_Apply_Throws() {
+    RuntimeException ex = new RuntimeException("test");
+    AttBiFunction<String, Integer, Integer, Integer> f = AttBiFunction.of("ctx", (a, b) -> { throw ex; });
+    RuntimeException thrown = Assertions.assertThrows(RuntimeException.class, () -> f.apply(1, 2));
+    Assertions.assertSame(ex, thrown);
+  }
+
+  @Test
+  void testBiFunction_Apply_ExecutesEachTime() {
+    AtomicInteger counter = new AtomicInteger(0);
+    AttBiFunction<String, String, String, Integer> f = AttBiFunction.of("ctx", (a, b) -> counter.incrementAndGet());
+    Assertions.assertEquals(1, f.apply("a", "b"));
+    Assertions.assertEquals(2, f.apply("c", "d"));
+  }
+
+  @Test
+  void testBiFunction_GetAtt() {
+    AttBiFunction<String, Integer, Integer, Integer> f = AttBiFunction.of("ctx", Integer::sum);
+    Assertions.assertEquals("ctx", f.getAtt());
+  }
+
+  @Test
+  void testBiFunction_GetBiFunction() {
+    BiFunction<Integer, Integer, Integer> delegate = Integer::sum;
+    AttBiFunction<String, Integer, Integer, Integer> f = AttBiFunction.of("ctx", delegate);
+    Assertions.assertSame(delegate, f.getBiFunction());
+  }
+
+  @Test
+  void testBiFunction_NullAtt() {
+    AttBiFunction<String, Integer, Integer, Integer> f = AttBiFunction.of(null, Integer::sum);
+    Assertions.assertNull(f.getAtt());
+    Assertions.assertTrue(f.toString().contains(", att=null"));
+  }
+
+  @Test
+  void testBiFunction_ToString() {
+    AttBiFunction<String, Integer, Integer, Integer> f = AttBiFunction.of("ctx", Integer::sum);
+    String s = f.toString();
+    Assertions.assertTrue(s.contains("AttBiFunction{biFunction=cn.addenda.component.common.test.lambda.att.AttTest$$Lambda"));
+    Assertions.assertTrue(s.contains(", att=ctx}"));
+  }
+
+  @Test
+  void testBiFunction_ToString_JacksonTrue() {
+    AttBiFunction<String, Integer, Integer, Integer> f = AttBiFunction.of("ctx", Integer::sum, true);
+    String s = f.toString();
+    Assertions.assertTrue(s.contains("AttBiFunction{biFunction=cn.addenda.component.common.test.lambda.att.AttTest$$Lambda"));
+    Assertions.assertTrue(s.contains(", att=\"ctx\"}"));
+  }
+
+  @Test
+  void testBiFunction_ToString_JacksonTrue_Complex() {
+    java.util.Map<String, Object> att = new java.util.HashMap<>();
+    att.put("key", "value");
+    AttBiFunction<java.util.Map<String, Object>, String, String, String> f = AttBiFunction.of(att, (a, b) -> a + b, true);
+    String s = f.toString();
+    Assertions.assertTrue(s.contains("\"key\""));
+    Assertions.assertTrue(s.contains("\"value\""));
+  }
+
+  // ==================== AttBiConsumer ====================
+
+  @Test
+  void testBiConsumer_Accept() {
+    AtomicInteger sum = new AtomicInteger(0);
+    AttBiConsumer<String, Integer, Integer> c = AttBiConsumer.of("ctx", (a, b) -> sum.set(a + b));
+    c.accept(3, 4);
+    Assertions.assertEquals(7, sum.get());
+  }
+
+  @Test
+  void testBiConsumer_Accept_Throws() {
+    RuntimeException ex = new RuntimeException("test");
+    AttBiConsumer<String, Integer, Integer> c = AttBiConsumer.of("ctx", (a, b) -> { throw ex; });
+    RuntimeException thrown = Assertions.assertThrows(RuntimeException.class, () -> c.accept(1, 2));
+    Assertions.assertSame(ex, thrown);
+  }
+
+  @Test
+  void testBiConsumer_GetAtt() {
+    AttBiConsumer<String, Integer, Integer> c = AttBiConsumer.of("ctx", (a, b) -> {});
+    Assertions.assertEquals("ctx", c.getAtt());
+  }
+
+  @Test
+  void testBiConsumer_GetBiConsumer() {
+    BiConsumer<Integer, Integer> delegate = (a, b) -> {};
+    AttBiConsumer<String, Integer, Integer> c = AttBiConsumer.of("ctx", delegate);
+    Assertions.assertSame(delegate, c.getBiConsumer());
+  }
+
+  @Test
+  void testBiConsumer_NullAtt() {
+    AttBiConsumer<String, Integer, Integer> c = AttBiConsumer.of(null, (a, b) -> {});
+    Assertions.assertNull(c.getAtt());
+    Assertions.assertTrue(c.toString().contains(", att=null"));
+  }
+
+  @Test
+  void testBiConsumer_ToString() {
+    AttBiConsumer<String, Integer, Integer> c = AttBiConsumer.of("ctx", (a, b) -> {});
+    String s = c.toString();
+    Assertions.assertTrue(s.contains("AttBiConsumer{biConsumer=cn.addenda.component.common.test.lambda.att.AttTest$$Lambda"));
+    Assertions.assertTrue(s.contains(", att=ctx}"));
+  }
+
+  @Test
+  void testBiConsumer_ToString_JacksonTrue() {
+    AttBiConsumer<String, Integer, Integer> c = AttBiConsumer.of("ctx", (a, b) -> {}, true);
+    String s = c.toString();
+    Assertions.assertTrue(s.contains("AttBiConsumer{biConsumer=cn.addenda.component.common.test.lambda.att.AttTest$$Lambda"));
+    Assertions.assertTrue(s.contains(", att=\"ctx\"}"));
   }
 }
