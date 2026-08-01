@@ -640,4 +640,124 @@ class StringUtilsTest {
     Assertions.assertTrue(StringUtils.endsWithIgnoreBlankAndCase("hello world  ", "world"));
   }
 
+  // ==================== atMost ====================
+
+  @Test
+  void testAtMost_Null() {
+    Assertions.assertNull(StringUtils.atMost(null, 5));
+  }
+
+  @Test
+  void testAtMost_Truncate() {
+    Assertions.assertEquals("Hello", StringUtils.atMost("Hello World", 5));
+  }
+
+  @Test
+  void testAtMost_ShorterThanMax() {
+    Assertions.assertEquals("Hi", StringUtils.atMost("Hi", 5));
+  }
+
+  @Test
+  void testAtMost_EqualToMax() {
+    Assertions.assertEquals("Hello", StringUtils.atMost("Hello", 5));
+  }
+
+  @Test
+  void testAtMost_ZeroMaxLength() {
+    Assertions.assertEquals("", StringUtils.atMost("Hello", 0));
+  }
+
+  @Test
+  void testAtMost_NegativeMaxLength() {
+    Assertions.assertEquals("Hello", StringUtils.atMost("Hello", -1));
+  }
+
+  @Test
+  void testAtMost_EmptyString() {
+    Assertions.assertEquals("", StringUtils.atMost("", 5));
+  }
+
+  // ==================== joinArrayToString (String[] pieces) ====================
+
+  @Test
+  void testJoinArrayToString_Normal() {
+    Assertions.assertEquals("a b c", StringUtils.joinArrayToString(new String[]{"a", "b", "c"}, 0, 3));
+  }
+
+  @Test
+  void testJoinArrayToString_SubRange() {
+    Assertions.assertEquals("b c", StringUtils.joinArrayToString(new String[]{"a", "b", "c", "d"}, 1, 3));
+  }
+
+  @Test
+  void testJoinArrayToString_NullPieces() {
+    Assertions.assertNull(StringUtils.joinArrayToString((String[]) null, 0, 1));
+  }
+
+  @Test
+  void testJoinArrayToString_EmptyRange() {
+    Assertions.assertEquals("", StringUtils.joinArrayToString(new String[]{"a", "b"}, 1, 1));
+  }
+
+  // ==================== joinArrayToString (String[] pieces, delimiter) ====================
+
+  @Test
+  void testJoinArrayToStringWithDelimiter_Comma() {
+    Assertions.assertEquals("a,b,c", StringUtils.joinArrayToString(new String[]{"a", "b", "c"}, ",", 0, 3));
+  }
+
+  @Test
+  void testJoinArrayToStringWithDelimiter_SubRange() {
+    Assertions.assertEquals("b-c-d", StringUtils.joinArrayToString(new String[]{"a", "b", "c", "d"}, "-", 1, 4));
+  }
+
+  @Test
+  void testJoinArrayToStringWithDelimiter_NullPieces() {
+    Assertions.assertNull(StringUtils.joinArrayToString(null, ",", 0, 1));
+  }
+
+  // ==================== joinArrayToString (String content, fromIndex, endIndex) ====================
+
+  @Test
+  void testJoinArrayToStringFromContent_Normal() {
+    Assertions.assertEquals("a b c", StringUtils.joinArrayToString("a b c", 0, 3));
+  }
+
+  @Test
+  void testJoinArrayToStringFromContent_SubRange() {
+    Assertions.assertEquals("b", StringUtils.joinArrayToString("a  b  c", 1, 2));
+  }
+
+  @Test
+  void testJoinArrayToStringFromContent_NullContent() {
+    Assertions.assertNull(StringUtils.joinArrayToString((String) null, 0, 1));
+  }
+
+  @Test
+  void testJoinArrayToStringFromContent_EmptyContent() {
+    Assertions.assertEquals("", StringUtils.joinArrayToString("", 0, 1));
+  }
+
+  // ==================== joinArrayToString (String content, splitRegex, delimiter) ====================
+
+  @Test
+  void testJoinArrayToStringWithRegex_Normal() {
+    Assertions.assertEquals("a,b,c", StringUtils.joinArrayToString("a b c", "\\s+", ",", 0, 3));
+  }
+
+  @Test
+  void testJoinArrayToStringWithRegex_SubRange() {
+    Assertions.assertEquals("c", StringUtils.joinArrayToString("a  b  c  d", "\\s+", ",", 2, 3));
+  }
+
+  @Test
+  void testJoinArrayToStringWithRegex_NullContent() {
+    Assertions.assertNull(StringUtils.joinArrayToString(null, "\\s+", ",", 0, 1));
+  }
+
+  @Test
+  void testJoinArrayToStringWithRegex_BlankContent() {
+    Assertions.assertEquals("  ", StringUtils.joinArrayToString("  ", "\\s+", ",", 0, 1));
+  }
+
 }

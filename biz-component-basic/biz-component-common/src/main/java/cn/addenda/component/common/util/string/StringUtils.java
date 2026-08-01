@@ -14,6 +14,19 @@ import java.util.stream.Collectors;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class StringUtils {
 
+  public static String atMost(String string, int maxLength) {
+    if (string == null) {
+      return null;
+    }
+    if (maxLength < 0) {
+      return string;
+    }
+    if (maxLength == 0) {
+      return "";
+    }
+    return string.length() > maxLength ? string.substring(0, maxLength) : string;
+  }
+
   public static String expandWithSpecifiedChar(String str, char specifiedChar, int expectLength) {
     int length = str.length();
     StringBuilder zero = new StringBuilder();
