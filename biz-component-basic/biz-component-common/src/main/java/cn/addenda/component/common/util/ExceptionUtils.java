@@ -1,7 +1,7 @@
 /*
  * copy from mybatis project.
  */
-package cn.addenda.component.common.exception;
+package cn.addenda.component.common.util;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;

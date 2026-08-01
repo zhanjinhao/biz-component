@@ -1,6 +1,6 @@
-package cn.addenda.component.common.test.exception;
+package cn.addenda.component.common.test.util;
 
-import cn.addenda.component.common.exception.ExceptionUtils;
+import cn.addenda.component.common.util.ExceptionUtils;
 import cn.addenda.component.common.exception.SystemException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
