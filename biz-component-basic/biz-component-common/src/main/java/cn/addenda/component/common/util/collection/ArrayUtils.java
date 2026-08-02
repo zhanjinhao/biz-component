@@ -60,7 +60,7 @@ public class ArrayUtils {
 
   /**
    * 可变参转 {@link TreeSet}（使用指定比较器）。
-   * <p>使用{@link CompareUtils#nullMaxCompare(Comparable, Comparable)}或{@link CompareUtils#nullMinCompare(Comparable, Comparable)}构造comparator可以避免NPE
+   * <p>使用{@link CompareUtils#nullLastCompare(Comparable, Comparable)}或{@link CompareUtils#nullFirstCompare(Comparable, Comparable)}构造comparator可以避免NPE
    *
    * @param comparator 比较器
    * @param objs       元素
