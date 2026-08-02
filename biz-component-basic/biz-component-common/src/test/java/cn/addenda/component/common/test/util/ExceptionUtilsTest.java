@@ -183,4 +183,50 @@ class ExceptionUtilsTest {
     String str = ExceptionUtils.getThrowableStr(ex);
     Assertions.assertTrue(str.contains("\tat "));
   }
+
+  // ==================== getThrowableFullStr ====================
+
+  @Test
+  void getThrowableFullStr_NullInput() {
+    Assertions.assertNull(ExceptionUtils.getThrowableFullStr(null));
+  }
+
+  @Test
+  void getThrowableFullStr_ContainsClassName() {
+    RuntimeException ex = new RuntimeException("test");
+    String str = ExceptionUtils.getThrowableFullStr(ex);
+    Assertions.assertTrue(str.startsWith("java.lang.RuntimeException: test"));
+  }
+
+  @Test
+  void getThrowableFullStr_ContainsCauseChain() {
+    IOException cause = new IOException("root");
+    RuntimeException ex = new RuntimeException("wrapper", cause);
+    String str = ExceptionUtils.getThrowableFullStr(ex);
+    Assertions.assertTrue(str.contains("Caused by: java.io.IOException: root"));
+    Assertions.assertFalse(str.contains("more"));
+  }
+
+  @Test
+  void getThrowableFullStr_ContainsSuppressed() {
+    RuntimeException ex = new RuntimeException("main", new RuntimeException("cause"));
+    ex.addSuppressed(new RuntimeException("suppressed1"));
+    ex.addSuppressed(new RuntimeException("suppressed2"));
+    String fullStr = ExceptionUtils.getThrowableFullStr(ex);
+    System.out.println(fullStr);
+    Assertions.assertTrue(fullStr.contains("Suppressed: java.lang.RuntimeException: suppressed1"));
+    Assertions.assertTrue(fullStr.contains("Suppressed: java.lang.RuntimeException: suppressed2"));
+
+    String str = ExceptionUtils.getThrowableStr(ex);
+    System.out.println(str);
+  }
+
+  @Test
+  void getThrowableFullStr_NoMoreTruncation() {
+    IOException cause = new IOException("root");
+    RuntimeException ex = new RuntimeException("wrapper", cause);
+    String str = ExceptionUtils.getThrowableFullStr(ex);
+    Assertions.assertFalse(str.contains("... "));
+  }
+
 }

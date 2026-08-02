@@ -83,4 +83,30 @@ public class ExceptionUtils {
     return error.toString();
   }
 
+  /**
+   * 输出完整堆栈（不压缩 cause / suppressed 的重复帧）。
+   */
+  public static String getThrowableFullStr(Throwable throwable) {
+    if (throwable == null) {
+      return null;
+    }
+    StringBuilder sb = new StringBuilder();
+    appendFull(sb, throwable, "", "");
+    return sb.toString();
+  }
+
+  private static void appendFull(StringBuilder sb, Throwable t, String prefix, String caption) {
+    sb.append(prefix).append(caption).append(t).append('\n');
+    for (StackTraceElement frame : t.getStackTrace()) {
+      sb.append(prefix).append("\tat ").append(frame).append('\n');
+    }
+    for (Throwable suppressed : t.getSuppressed()) {
+      appendFull(sb, suppressed, prefix + "\t", "Suppressed: ");
+    }
+    Throwable cause = t.getCause();
+    if (cause != null) {
+      appendFull(sb, cause, prefix, "Caused by: ");
+    }
+  }
+
 }
