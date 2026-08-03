@@ -3,3 +3,5 @@
 #cn.addenda.component.common.lambda.named.NamedSupplier
 #cn.addenda.component.common.lambda.named.NamedCallable
 #cn.addenda.component.common.util.RetryUtils
+#cn.addenda.component.common.collection.IterableUtils
+#cn.addenda.component.common.collection.BatchUtils
