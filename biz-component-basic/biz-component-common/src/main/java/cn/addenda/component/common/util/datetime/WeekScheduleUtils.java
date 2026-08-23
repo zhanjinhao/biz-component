@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -66,6 +67,19 @@ public class WeekScheduleUtils {
 
     newWeekScheduleList.sort(Comparator.comparing(Integer::intValue));
     return newWeekScheduleList.stream().map(String::valueOf).collect(Collectors.joining(""));
+  }
+
+  /**
+   * 将班期从原时区转换到目标时区
+   *
+   * @param weekSchedule 原班期，由 1~7 的不重复数字组成（1=周一，7=周日）
+   * @param sourceZone   原时区，固定偏移格式，如 +08:00
+   * @param targetZone   目标时区，固定偏移格式，如 -05:00
+   * @param localTime    计算日期偏移时的基准时间，用于判断跨天
+   * @return 原班期从原时区转到目标时区之后的班期
+   */
+  public static String convertWeekSchedule(String weekSchedule, String sourceZone, String targetZone, LocalTime localTime) {
+    return convertWeekSchedule(weekSchedule, TimeZoneUtils.dateOffsetBetween(sourceZone, targetZone, localTime));
   }
 
   private static void assertWeekSchedule(String weekSchedule) {

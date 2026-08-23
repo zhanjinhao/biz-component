@@ -1,11 +1,13 @@
 package cn.addenda.component.common.test.util.datetime;
 
+import cn.addenda.component.common.util.datetime.TimeZoneUtils;
 import cn.addenda.component.common.util.datetime.WeekScheduleUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import static cn.addenda.component.common.util.datetime.WeekScheduleUtils.convertWeekSchedule;
 import static cn.addenda.component.common.util.datetime.WeekScheduleUtils.getWeekSchedule;
@@ -309,6 +311,178 @@ class WeekScheduleUtilsTest {
   void testConvertWeekScheduleNegativeSign() {
     assertThrows(IllegalArgumentException.class, () -> {
       convertWeekSchedule("-1", 1);
+    });
+  }
+
+  // ==================================================================
+  //  convertWeekSchedule(String, String, String, LocalTime) — 时区转换
+  // ==================================================================
+
+  @Test
+  void testConvertWeekScheduleZone_sameZone() {
+    Assertions.assertEquals("123", convertWeekSchedule("123", "+08:00", "+08:00", LocalTime.of(12, 0)));
+    Assertions.assertEquals("17", convertWeekSchedule("17", "+08:00", "+08:00", LocalTime.of(23, 59)));
+  }
+
+  @Test
+  void testConvertWeekScheduleZone_offsetNegative() {
+    // 12:00 +08:00 → -05:00 = 前一天23:00，日期偏移 -1
+    Assertions.assertEquals("127", convertWeekSchedule("123", "+08:00", "-05:00", LocalTime.of(12, 0)));
+    Assertions.assertEquals("67", convertWeekSchedule("17", "+08:00", "-05:00", LocalTime.of(12, 0)));
+  }
+
+  @Test
+  void testConvertWeekScheduleZone_offsetPositive() {
+    // 22:00 +08:00 → +12:00 = 次日02:00，日期偏移 +1
+    Assertions.assertEquals("234", convertWeekSchedule("123", "+08:00", "+12:00", LocalTime.of(22, 0)));
+    Assertions.assertEquals("12", convertWeekSchedule("17", "+08:00", "+12:00", LocalTime.of(22, 0)));
+  }
+
+  @Test
+  void testConvertWeekScheduleZone_boundaryExactlyMidnight() {
+    // 13:00 +08:00 → -05:00 = 00:00，日期偏移 0
+    Assertions.assertEquals("123", convertWeekSchedule("123", "+08:00", "-05:00", LocalTime.of(13, 0)));
+  }
+
+  @Test
+  void testConvertWeekScheduleZone_boundaryOneMinuteBefore() {
+    // 12:59 +08:00 → -05:00 = 前一天23:59，日期偏移 -1
+    Assertions.assertEquals("127", convertWeekSchedule("123", "+08:00", "-05:00", LocalTime.of(12, 59)));
+  }
+
+  @Test
+  void testConvertWeekScheduleZone_boundaryOneMinuteAfter() {
+    // 13:01 +08:00 → -05:00 = 00:01，日期偏移 0
+    Assertions.assertEquals("123", convertWeekSchedule("123", "+08:00", "-05:00", LocalTime.of(13, 1)));
+  }
+
+  @Test
+  void testConvertWeekScheduleZone_utcTarget() {
+    // 06:00 +08:00 → +00:00 = 前一天22:00，日期偏移 -1
+    Assertions.assertEquals("67", convertWeekSchedule("17", "+08:00", TimeZoneUtils.TIME_ZONE_UTC, LocalTime.of(6, 0)));
+  }
+
+  @Test
+  void testConvertWeekScheduleZone_quarterHourOffset() {
+    // 23:30 +08:45 → +09:15 = 次日00:00，日期偏移 +1
+    Assertions.assertEquals("1", convertWeekSchedule("7", "+08:45", "+09:15", LocalTime.of(23, 30)));
+    // 23:29 +08:45 → +09:15 = 23:59，日期偏移 0
+    Assertions.assertEquals("7", convertWeekSchedule("7", "+08:45", "+09:15", LocalTime.of(23, 29)));
+  }
+
+  // ==================================================================
+  //  极限场景 — 跨两天（时区差 ±36h，日期偏移 ±2）
+  // ==================================================================
+
+  @Test
+  void testConvertWeekScheduleZone_crossTwoDaysPositive() {
+    // -18:00 → +18:00 相差 +36h，12:00 基准时间落到后天，日期偏移 +2
+    Assertions.assertEquals("345", convertWeekSchedule("123", "-18:00", "+18:00", LocalTime.of(12, 0)));
+    Assertions.assertEquals("23", convertWeekSchedule("17", "-18:00", "+18:00", LocalTime.of(12, 0)));
+  }
+
+  @Test
+  void testConvertWeekScheduleZone_crossTwoDaysNegative() {
+    // +18:00 → -18:00 相差 -36h，00:00 基准时间落到前天，日期偏移 -2
+    Assertions.assertEquals("167", convertWeekSchedule("123", "+18:00", "-18:00", LocalTime.of(0, 0)));
+    Assertions.assertEquals("56", convertWeekSchedule("17", "+18:00", "-18:00", LocalTime.of(0, 0)));
+  }
+
+  @Test
+  void testConvertWeekScheduleZone_crossTwoDaysBoundary() {
+    // -18:00 → +18:00：11:59 偏移 +1，12:00 偏移 +2
+    Assertions.assertEquals("234", convertWeekSchedule("123", "-18:00", "+18:00", LocalTime.of(11, 59)));
+    Assertions.assertEquals("345", convertWeekSchedule("123", "-18:00", "+18:00", LocalTime.of(12, 0)));
+
+    // +18:00 → -18:00：11:59 偏移 -2，12:00 偏移 -1
+    Assertions.assertEquals("167", convertWeekSchedule("123", "+18:00", "-18:00", LocalTime.of(11, 59)));
+    Assertions.assertEquals("127", convertWeekSchedule("123", "+18:00", "-18:00", LocalTime.of(12, 0)));
+  }
+
+  @Test
+  void testConvertWeekScheduleZone_crossTwoDaysFullWeekInvariant() {
+    Assertions.assertEquals("1234567",
+            convertWeekSchedule("1234567", "-18:00", "+18:00", LocalTime.of(12, 0)));
+    Assertions.assertEquals("1234567",
+            convertWeekSchedule("1234567", "+18:00", "-18:00", LocalTime.of(0, 0)));
+  }
+
+  @Test
+  void testConvertWeekScheduleZone_crossTwoDaysConsistentWithDateOffset() {
+    Assertions.assertEquals(2, TimeZoneUtils.dateOffsetBetween("-18:00", "+18:00", LocalTime.of(12, 0)));
+    Assertions.assertEquals(-2, TimeZoneUtils.dateOffsetBetween("+18:00", "-18:00", LocalTime.of(0, 0)));
+    Assertions.assertEquals(
+            convertWeekSchedule("123", 2),
+            convertWeekSchedule("123", "-18:00", "+18:00", LocalTime.of(12, 0)));
+    Assertions.assertEquals(
+            convertWeekSchedule("123", -2),
+            convertWeekSchedule("123", "+18:00", "-18:00", LocalTime.of(0, 0)));
+  }
+
+  @Test
+  void testConvertWeekScheduleZone_fullWeekInvariant() {
+    // 全周班期在任何时区偏移下不变
+    Assertions.assertEquals("1234567",
+            convertWeekSchedule("1234567", "+08:00", "-05:00", LocalTime.of(12, 0)));
+    Assertions.assertEquals("1234567",
+            convertWeekSchedule("1234567", "+08:00", "+12:00", LocalTime.of(22, 0)));
+    Assertions.assertEquals("1234567",
+            convertWeekSchedule("1234567", "-18:00", "+18:00", LocalTime.of(1, 0)));
+  }
+
+  @Test
+  void testConvertWeekScheduleZone_consistentWithDateOffset() {
+    LocalTime localTime = LocalTime.of(12, 0);
+    int offset = TimeZoneUtils.dateOffsetBetween("+08:00", "-05:00", localTime);
+    Assertions.assertEquals(
+            convertWeekSchedule("123", offset),
+            convertWeekSchedule("123", "+08:00", "-05:00", localTime));
+  }
+
+  @Test
+  void testConvertWeekScheduleZone_invalidWeekSchedule() {
+    assertThrows(IllegalArgumentException.class, () -> {
+      convertWeekSchedule("abc", "+08:00", "-05:00", LocalTime.of(12, 0));
+    });
+    assertThrows(IllegalArgumentException.class, () -> {
+      convertWeekSchedule("08", "+08:00", "-05:00", LocalTime.of(12, 0));
+    });
+    assertThrows(IllegalArgumentException.class, () -> {
+      convertWeekSchedule("112", "+08:00", "-05:00", LocalTime.of(12, 0));
+    });
+  }
+
+  @Test
+  void testConvertWeekScheduleZone_nullWeekSchedule() {
+    assertThrows(IllegalArgumentException.class, () -> {
+      convertWeekSchedule(null, "+08:00", "-05:00", LocalTime.of(12, 0));
+    });
+  }
+
+  @Test
+  void testConvertWeekScheduleZone_invalidZone() {
+    assertThrows(IllegalArgumentException.class, () -> {
+      convertWeekSchedule("1", "Asia/Shanghai", "+08:00", LocalTime.of(12, 0));
+    });
+    assertThrows(IllegalArgumentException.class, () -> {
+      convertWeekSchedule("1", "+07:37", "+08:00", LocalTime.of(12, 0));
+    });
+  }
+
+  @Test
+  void testConvertWeekScheduleZone_nullZone() {
+    assertThrows(IllegalArgumentException.class, () -> {
+      convertWeekSchedule("1", null, "+08:00", LocalTime.of(12, 0));
+    });
+    assertThrows(IllegalArgumentException.class, () -> {
+      convertWeekSchedule("1", "+08:00", null, LocalTime.of(12, 0));
+    });
+  }
+
+  @Test
+  void testConvertWeekScheduleZone_nullLocalTime() {
+    assertThrows(NullPointerException.class, () -> {
+      convertWeekSchedule("1", "+08:00", "-05:00", null);
     });
   }
 
