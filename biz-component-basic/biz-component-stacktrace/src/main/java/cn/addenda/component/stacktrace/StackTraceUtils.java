@@ -5,10 +5,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -23,8 +25,10 @@ public class StackTraceUtils {
 
   private static final String EXCLUDED_PATH = "META-INF/biz-component-stacktrace.excluded";
 
+  private static final char BOM = 0xFEFF;
+
   static {
-    Set<IdentifierMatcher> lines = new HashSet<>();
+    Set<IdentifierMatcher> identifierMatchers = new HashSet<>();
     try {
       ClassLoader classLoader = StackTraceUtils.class.getClassLoader();
       Enumeration<URL> urls = classLoader.getResources(EXCLUDED_PATH);
@@ -32,21 +36,48 @@ public class StackTraceUtils {
         URL url = urls.nextElement();
         URLConnection urlConnection = url.openConnection();
         urlConnection.setUseCaches(false);
-        try (InputStream inputStream = urlConnection.getInputStream();
-             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream))) {
-          String line;
-          while ((line = bufferedReader.readLine()) != null) {
-            if (line.isEmpty()) {
-              continue;
-            }
-            lines.add(IdentifierMatcherFactory.getIdentifierMatcher(line));
-          }
+        try (InputStream inputStream = urlConnection.getInputStream()) {
+          identifierMatchers.addAll(readExcludeSet(inputStream));
         }
       }
     } catch (Exception e) {
       throw new StackTraceException(String.format("Can not open file: [%s].", EXCLUDED_PATH), e);
     }
-    defaultExcludeSet = Collections.unmodifiableSet(lines);
+    defaultExcludeSet = Collections.unmodifiableSet(identifierMatchers);
+  }
+
+  /**
+   * 读取排除清单，一行一个标识（格式见 {@link IdentifierMatcherFactory#getIdentifierMatcher(String)}）。
+   * <p>按 UTF-8 解码，并且会做归一化处理，避免生成"永远匹配不上"的 matcher：
+   * <ul>
+   *   <li>剔除行首的 UTF-8 BOM（U+FEFF），例如 Windows 记事本另存 UTF-8 时会写入 BOM；</li>
+   *   <li>剔除行首行尾的空白字符，空行（含纯空白行）直接跳过。</li>
+   * </ul>
+   * <p>注意：本方法不关闭入参 {@code inputStream}，由调用方负责关闭。
+   *
+   * @param inputStream 排除清单输入流，不能为 null
+   * @return 排除清单对应的 matcher 集合
+   */
+  public static Set<IdentifierMatcher> readExcludeSet(InputStream inputStream) throws IOException {
+    Set<IdentifierMatcher> identifierMatchers = new HashSet<>();
+    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+    String line;
+    while ((line = bufferedReader.readLine()) != null) {
+      String identifier = normalize(line);
+      if (identifier.isEmpty()) {
+        continue;
+      }
+      identifierMatchers.add(IdentifierMatcherFactory.getIdentifierMatcher(identifier));
+    }
+    return identifierMatchers;
+  }
+
+  private static String normalize(String line) {
+    String identifier = line.trim();
+    if (!identifier.isEmpty() && identifier.charAt(0) == BOM) {
+      identifier = identifier.substring(1).trim();
+    }
+    return identifier;
   }
 
   /**
