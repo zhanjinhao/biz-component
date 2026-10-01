@@ -214,8 +214,8 @@ class StackTraceUtilsExcludeSetTest {
 
   /**
    * 真实资源文件的端到端校验：能读到、能解析。
-   * <p>模块自带的清单里写了什么就解析出什么；不像以前那样依赖资源文件里的
-   * "自排除那一行"——现在自排除是内置的（见 {@link StackTraceUtils#getDefaultExcludeSet()}）。
+   * <p>本模块的清单目前只有注释（自排除已内置在代码里），解析结果应为空集合——
+   * 这同时验证了"纯注释文件"不会被当成非法行。
    */
   @Test
   void testModuleResourceIsReadable() throws IOException {
@@ -224,7 +224,7 @@ class StackTraceUtilsExcludeSetTest {
 
     Set<IdentifierMatcher> excludeSet = StackTraceUtils.readExcludeSet(inputStream);
 
-    Assertions.assertTrue(matches(excludeSet, "java.lang.Thread", "run"));
+    Assertions.assertTrue(excludeSet.isEmpty(), "本模块不再声明额外排除项，excludeSet=" + excludeSet);
   }
 
   /**
@@ -274,8 +274,6 @@ class StackTraceUtilsExcludeSetTest {
             "size 与实际排除项数量不一致：" + output);
     // 内置的自排除项
     Assertions.assertTrue(output.contains(STACK_TRACE_UTILS), "缺少内置自排除项：" + output);
-    // 模块自带清单里的条目
-    Assertions.assertTrue(output.contains("java.lang.Thread"), "缺少模块自带清单的条目：" + output);
   }
 
   private static Set<IdentifierMatcher> read(String content) throws IOException {

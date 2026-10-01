@@ -84,9 +84,9 @@ public class StackTraceUtils {
    * 用的哪个类加载器发现的清单、当前生效的排除项有哪些。排查"清单没生效"时先看这几行——
    * 尤其 Spring Boot devtools 这种清单可能在子加载器里的场景。
    * <pre>
-   *   StackTraceUtils exclude set. thisClassLoader:[...LaunchedURLClassLoader@...], discoveryClassLoader:[...RestartClassLoader@...], size:[3].
+   *   StackTraceUtils exclude set. thisClassLoader:[...LaunchedURLClassLoader@...], discoveryClassLoader:[...RestartClassLoader@...], size:[2].
+   *     ClassNameAndMethodNameMatcher{className='cn.addenda.myapp.MyService', methodName='doSomething'}
    *     ClassNameMatcher{className='cn.addenda.component.stacktrace.StackTraceUtils'}
-   *     ClassNameMatcher{className='java.lang.Thread'}
    * </pre>
    * <p>每次调用都会输出一次；加载失败时不输出（先抛异常，避免打出与实际不符的内容）。
    *

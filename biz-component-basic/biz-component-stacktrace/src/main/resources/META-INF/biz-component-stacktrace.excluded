@@ -1,1 +1,6 @@
-#java.lang.Thread
+-- 本模块没有需要额外排除的栈帧（自排除 StackTraceUtils 已内置在代码里，见 StackTraceUtils.BUILT_IN_EXCLUDE_SET）。
+-- 该文件用于各模块在自己的 jar 里"就近声明"需要跳过的栈帧，一行一个标识：
+--   #className            按全限定名精确匹配一个类
+--   #className#methodName 按全限定名 + 方法名精确匹配
+--   classNamePrefix       不写 #，按类名前缀匹配（如 cn.addenda.component.）
+-- 以 -- 开头的行是注释；文件不存在或只有注释都可以。

@@ -157,15 +157,16 @@ class StackTraceUtilsLoadDefaultExcludeSetTest {
   }
 
   /**
-   * 真实 classpath：模块自带的排除清单必须能被读到并解析出来。
+   * 真实 classpath：内置自排除项必须生效。
+   * <p>模块自己的清单只有注释，所以这里是"内置项 + 空"。
    */
   @Test
   void testRealClassLoader() {
     Set<IdentifierMatcher> excludeSet = StackTraceUtils.loadDefaultExcludeSet(
             StackTraceUtils.class.getClassLoader());
 
+    Assertions.assertEquals(1, excludeSet.size(), "excludeSet=" + excludeSet);
     Assertions.assertTrue(matches(excludeSet, STACK_TRACE_UTILS, "getCallerInfo"), "excludeSet=" + excludeSet);
-    Assertions.assertTrue(matches(excludeSet, "java.lang.Thread", "run"), "excludeSet=" + excludeSet);
   }
 
   /**
