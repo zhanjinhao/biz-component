@@ -167,7 +167,7 @@ class StackTraceUtilsTest {
     Callable<String> callable = new Callable<String>() {
       @Override
       public String call() {
-        return StackTraceUtils.getDetailedCallerInfo(false, false);
+        return StackTraceUtils.getDetailedCallerInfo(true, false, false);
       }
     };
 

@@ -260,10 +260,6 @@ public class StackTraceUtils {
     return getCallerInfo(useSimpleClassName, ifExcludeLambda, ifExcludeAnonymousInnerClass, (String[]) null);
   }
 
-  public static String getCallerInfo(boolean ifExcludeLambda, boolean ifExcludeAnonymousInnerClass) {
-    return getCallerInfo(true, ifExcludeLambda, ifExcludeAnonymousInnerClass);
-  }
-
   public static String getCallerInfo() {
     return getCallerInfo(true, false, false);
   }
@@ -300,10 +296,6 @@ public class StackTraceUtils {
   public static String getDetailedCallerInfo(
           boolean useSimpleClassName, boolean ifExcludeLambda, boolean ifExcludeAnonymousInnerClass) {
     return getDetailedCallerInfo(useSimpleClassName, ifExcludeLambda, ifExcludeAnonymousInnerClass, (String[]) null);
-  }
-
-  public static String getDetailedCallerInfo(boolean ifExcludeLambda, boolean ifExcludeAnonymousInnerClass) {
-    return getDetailedCallerInfo(true, ifExcludeLambda, ifExcludeAnonymousInnerClass, (String[]) null);
   }
 
   public static String getDetailedCallerInfo() {
