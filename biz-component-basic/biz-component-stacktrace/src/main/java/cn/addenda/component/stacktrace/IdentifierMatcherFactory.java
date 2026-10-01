@@ -27,20 +27,50 @@ public class IdentifierMatcherFactory {
 
   /**
    * 获取IdentifierMatcher
+   * <p>支持的标识格式：
+   * <ul>
+   *   <li>{@code classNamePrefix} —— 不含 {@code #}，按类名前缀匹配；</li>
+   *   <li>{@code #className} —— 按类的全限定名精确匹配；</li>
+   *   <li>{@code #className#methodName} —— 按类的全限定名 + 方法名精确匹配。</li>
+   * </ul>
+   *
+   * @param identifier 标识，不能为 null 或空
+   * @throws StackTraceException identifier 为 null、为空或格式非法时抛出
    */
   public static IdentifierMatcher getIdentifierMatcher(String identifier) {
-    return identifierMatcherMap.computeIfAbsent(identifier,
-            s -> {
-              if (!identifier.startsWith(HASH)) {
-                return new ClassNamePrefixMatcher(identifier);
-              }
+    if (identifier == null || identifier.isEmpty()) {
+      throw new StackTraceException("identifier can not be null or empty.");
+    }
+    return identifierMatcherMap.computeIfAbsent(identifier, IdentifierMatcherFactory::createIdentifierMatcher);
+  }
 
-              String[] split = identifier.substring(1).split(HASH);
-              if (split.length == 1) {
-                return new ClassNameMatcher(split[0]);
-              }
-              return new ClassNameAndMethodNameMatcher(split[0], split[1]);
-            });
+  private static IdentifierMatcher createIdentifierMatcher(String identifier) {
+    if (!identifier.startsWith(HASH)) {
+      return new ClassNamePrefixMatcher(identifier);
+    }
+
+    int methodHash = identifier.indexOf(HASH, HASH.length());
+    if (methodHash < 0) {
+      // #className
+      String className = identifier.substring(HASH.length());
+      if (className.isEmpty()) {
+        throw invalidIdentifier(identifier);
+      }
+      return new ClassNameMatcher(className);
+    }
+
+    // #className#methodName
+    String className = identifier.substring(HASH.length(), methodHash);
+    String methodName = identifier.substring(methodHash + HASH.length());
+    if (className.isEmpty() || methodName.isEmpty() || methodName.indexOf(HASH) >= 0) {
+      throw invalidIdentifier(identifier);
+    }
+    return new ClassNameAndMethodNameMatcher(className, methodName);
+  }
+
+  private static StackTraceException invalidIdentifier(String identifier) {
+    return new StackTraceException(String.format("Invalid identifier: [%s]. "
+            + "The supported formats are [classNamePrefix], [#className] and [#className#methodName].", identifier));
   }
 
   /**

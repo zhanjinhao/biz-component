@@ -53,7 +53,7 @@ class MatcherTest {
     Assertions.assertThrows(StackTraceException.class, () ->
             IdentifierMatcherFactory.getIdentifierMatcher("#"));
 
-    Assertions.assertThrows(ArrayIndexOutOfBoundsException.class, () ->
+    Assertions.assertThrows(StackTraceException.class, () ->
             IdentifierMatcherFactory.getIdentifierMatcher("##"));
   }
 
