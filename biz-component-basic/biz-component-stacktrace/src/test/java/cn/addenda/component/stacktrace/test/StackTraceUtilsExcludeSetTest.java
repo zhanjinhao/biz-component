@@ -3,13 +3,16 @@ package cn.addenda.component.stacktrace.test;
 import cn.addenda.component.stacktrace.ClassNameMatcher;
 import cn.addenda.component.stacktrace.IdentifierMatcher;
 import cn.addenda.component.stacktrace.IdentifierMatcherFactory;
+import cn.addenda.component.stacktrace.StackTraceException;
 import cn.addenda.component.stacktrace.StackTraceUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
@@ -139,6 +142,33 @@ class StackTraceUtilsExcludeSetTest {
   }
 
   /**
+   * 非法行要直接抛异常（配置错误中断启动），并且异常里必须能定位到行号和原始内容。
+   */
+  @Test
+  void testInvalidLineThrowsWithLocation() {
+    String[] invalidIdentifiers = {"#", "##", "#a#", "#a#b#c"};
+
+    for (String invalidIdentifier : invalidIdentifiers) {
+      StackTraceException e = Assertions.assertThrows(StackTraceException.class, () ->
+              read("-- 注释\n#cn.a.MyClass\n" + invalidIdentifier + "\n#cn.a.Other\n"));
+
+      Assertions.assertTrue(e.getMessage().contains("[" + invalidIdentifier + "]"), "message=" + e.getMessage());
+      Assertions.assertTrue(e.getMessage().contains("line 3"), "message=" + e.getMessage());
+      Assertions.assertNotNull(e.getCause(), "cause 里要带具体原因");
+    }
+  }
+
+  /**
+   * 非法行不能"跳过就算"，哪怕它前后都是合法行。
+   */
+  @Test
+  void testFirstInvalidLineFailsWholeFile() {
+    StackTraceException e = Assertions.assertThrows(StackTraceException.class, () ->
+            read("#\n#cn.a.MyClass\n"));
+    Assertions.assertTrue(e.getMessage().contains("line 1"), "message=" + e.getMessage());
+  }
+
+  /**
    * 排除清单按 UTF-8 解码，不受平台默认字符集影响（例如 GBK）。
    */
   @Test
@@ -183,8 +213,9 @@ class StackTraceUtilsExcludeSetTest {
   }
 
   /**
-   * 真实资源文件的端到端校验：能读到、能解析、且 StackTraceUtils 自身被排除。
-   * <p>一旦读取链路（BOM/空白/字符集）出问题，本模块会返回自己的内部栈帧而不是调用方栈帧。
+   * 真实资源文件的端到端校验：能读到、能解析。
+   * <p>模块自带的清单里写了什么就解析出什么；不像以前那样依赖资源文件里的
+   * "自排除那一行"——现在自排除是内置的（见 {@link StackTraceUtils#getDefaultExcludeSet()}）。
    */
   @Test
   void testModuleResourceIsReadable() throws IOException {
@@ -193,13 +224,12 @@ class StackTraceUtilsExcludeSetTest {
 
     Set<IdentifierMatcher> excludeSet = StackTraceUtils.readExcludeSet(inputStream);
 
-    Assertions.assertTrue(matches(excludeSet, STACK_TRACE_UTILS, "getCallerInfo"),
-            "StackTraceUtils 必须排除自己，否则 getCallerInfo 返回的是内部栈帧。excludeSet=" + excludeSet);
     Assertions.assertTrue(matches(excludeSet, "java.lang.Thread", "run"));
   }
 
   /**
-   * 静态初始化读到的排除集合必须包含 StackTraceUtils 自身。
+   * 默认排除集合必须包含 StackTraceUtils 自身，否则 {@code getCallerInfo()} 返回的是内部栈帧
+   * （实测过：配置文件缺失时会返回 {@code StackTraceUtils#determineStackTraceElement}）。
    */
   @Test
   void testDefaultExcludeSetContainsStackTraceUtils() {
@@ -207,6 +237,45 @@ class StackTraceUtilsExcludeSetTest {
             IdentifierMatcherFactory.match(StackTraceUtils.getDefaultExcludeSet(),
                     element(STACK_TRACE_UTILS, "getCallerInfo")),
             "defaultExcludeSet=" + StackTraceUtils.getDefaultExcludeSet());
+  }
+
+  /**
+   * 一行式启动校验入口：配置正常时不抛异常，且可重复调用。
+   */
+  @Test
+  void testValidate() {
+    StackTraceUtils.validate();
+    StackTraceUtils.validate();
+
+    Assertions.assertFalse(StackTraceUtils.getDefaultExcludeSet().isEmpty());
+    // 列表只加载一次，validate 之后不会重复读取
+    Assertions.assertSame(StackTraceUtils.getDefaultExcludeSet(), StackTraceUtils.getDefaultExcludeSet());
+  }
+
+  /**
+   * validate() 要把"谁加载的清单、有哪些排除项"打到 System.out，排查"清单没生效"时靠这几行。
+   */
+  @Test
+  void testValidatePrintsClassLoaderAndExcludeSet() throws IOException {
+    ByteArrayOutputStream captured = new ByteArrayOutputStream();
+    PrintStream originalOut = System.out;
+    try {
+      System.setOut(new PrintStream(captured, true, StandardCharsets.UTF_8.name()));
+      StackTraceUtils.validate();
+    } finally {
+      System.setOut(originalOut);
+    }
+
+    String output = new String(captured.toByteArray(), StandardCharsets.UTF_8);
+
+    Assertions.assertTrue(output.contains("thisClassLoader:["), "缺少 thisClassLoader：" + output);
+    Assertions.assertTrue(output.contains("discoveryClassLoader:["), "缺少 discoveryClassLoader：" + output);
+    Assertions.assertTrue(output.contains("size:[" + StackTraceUtils.getDefaultExcludeSet().size() + "]"),
+            "size 与实际排除项数量不一致：" + output);
+    // 内置的自排除项
+    Assertions.assertTrue(output.contains(STACK_TRACE_UTILS), "缺少内置自排除项：" + output);
+    // 模块自带清单里的条目
+    Assertions.assertTrue(output.contains("java.lang.Thread"), "缺少模块自带清单的条目：" + output);
   }
 
   private static Set<IdentifierMatcher> read(String content) throws IOException {
