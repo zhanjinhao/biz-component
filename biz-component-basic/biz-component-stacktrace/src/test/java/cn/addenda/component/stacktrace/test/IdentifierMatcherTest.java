@@ -12,10 +12,10 @@ class IdentifierMatcherTest {
             IdentifierMatcherFactory.withHash(IdentifierMatcherTest.class, "testIdentifier"));
     System.out.println(identifierMatcher1);
     Assertions.assertEquals(ClassNameAndMethodNameMatcher.class, identifierMatcher1.getClass());
-    IdentifierMatcher identifierMatcher2 = IdentifierMatcherFactory.getIdentifierMatcher(IdentifierMatcherTest.class);
+    IdentifierMatcher identifierMatcher2 = IdentifierMatcherFactory.classMatcher(IdentifierMatcherTest.class);
     System.out.println(identifierMatcher2);
     Assertions.assertEquals(ClassNameMatcher.class, identifierMatcher2.getClass());
-    IdentifierMatcher identifierMatcher3 = IdentifierMatcherFactory.getIdentifierMatcher(IdentifierMatcherTest.class, true);
+    IdentifierMatcher identifierMatcher3 = IdentifierMatcherFactory.prefixMatcher(IdentifierMatcherTest.class);
     System.out.println(identifierMatcher3);
     Assertions.assertEquals(ClassNamePrefixMatcher.class, identifierMatcher3.getClass());
   }

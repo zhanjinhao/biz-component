@@ -44,7 +44,7 @@ public class StackTraceUtils {
    * 否则 {@code getCallerInfo} 返回的是工具类的内部栈帧（例如 {@code StackTraceUtils#determineStackTraceElement}）。
    */
   private static final Set<IdentifierMatcher> BUILT_IN_EXCLUDE_SET = Collections.singleton(
-          IdentifierMatcherFactory.getIdentifierMatcher(StackTraceUtils.class));
+          IdentifierMatcherFactory.classMatcher(StackTraceUtils.class));
 
   /**
    * 获取默认排除集合：内置排除项 + classpath 上所有排除清单。

@@ -23,6 +23,82 @@ class IdentifierMatcherFactoryParseTest {
     Assertions.assertTrue(matcher.match(element("cn.a.MyClass", "m")));
     Assertions.assertTrue(matcher.match(element("cn.a.sub.Cls", "m")));
     Assertions.assertFalse(matcher.match(element("cn.b.MyClass", "m")));
+    // 前缀是字符串前缀：cn.a. 不会匹配 cn.ab.MyClass
+    Assertions.assertFalse(matcher.match(element("cn.ab.MyClass", "m")));
+  }
+
+  /**
+   * {@code *} 没有任何匹配含义（类名、方法名都不含它），出现只会生成"永远匹配不上"的 matcher，因此直接报错。
+   * 前缀匹配直接写类名前缀，如 {@code cn.a.}。
+   */
+  @Test
+  void testWildcardIsRejected() {
+    String[] invalidIdentifiers = {"cn.a.*", "cn.*.MyClass", "*", "cn.a.**", "#cn.a.MyClass*"};
+
+    for (String invalidIdentifier : invalidIdentifiers) {
+      StackTraceException e = Assertions.assertThrows(StackTraceException.class, () ->
+              IdentifierMatcherFactory.getIdentifierMatcher(invalidIdentifier));
+      Assertions.assertTrue(e.getMessage().contains("[" + invalidIdentifier + "]"), "message=" + e.getMessage());
+      Assertions.assertTrue(e.getMessage().contains("[cn.a.]"), "message 里要给出前缀写法：" + e.getMessage());
+    }
+  }
+
+  /**
+   * 含空白字符的标识永远匹配不上（类名/方法名不含空白），必须报错而不是静默接受。
+   */
+  @Test
+  void testWhitespaceIdentifierIsRejected() {
+    String[] invalidIdentifiers = {"#cn.a.MyClass ", " #cn.a.MyClass", "#cn.a.My Class", "cn.a. MyClass*"};
+
+    for (String invalidIdentifier : invalidIdentifiers) {
+      Assertions.assertThrows(StackTraceException.class, () ->
+              IdentifierMatcherFactory.getIdentifierMatcher(invalidIdentifier));
+    }
+  }
+
+  /**
+   * 显式工厂方法：三种语义各有专用入口，不依赖任何"默认语义"。
+   */
+  @Test
+  void testExplicitFactoryMethods() {
+    IdentifierMatcher classMatcher = IdentifierMatcherFactory.classMatcher("cn.a.MyClass");
+    Assertions.assertEquals(ClassNameMatcher.class, classMatcher.getClass());
+    Assertions.assertTrue(classMatcher.match(element("cn.a.MyClass", "m")));
+    Assertions.assertFalse(classMatcher.match(element("cn.a.MyClass2", "m")));
+
+    IdentifierMatcher classAndMethodMatcher = IdentifierMatcherFactory.classAndMethodMatcher("cn.a.MyClass", "myMethod");
+    Assertions.assertEquals(ClassNameAndMethodNameMatcher.class, classAndMethodMatcher.getClass());
+    Assertions.assertTrue(classAndMethodMatcher.match(element("cn.a.MyClass", "myMethod")));
+    Assertions.assertFalse(classAndMethodMatcher.match(element("cn.a.MyClass", "other")));
+
+    IdentifierMatcher prefixMatcher = IdentifierMatcherFactory.prefixMatcher("cn.a.");
+    Assertions.assertEquals(ClassNamePrefixMatcher.class, prefixMatcher.getClass());
+    Assertions.assertTrue(prefixMatcher.match(element("cn.a.sub.Cls", "m")));
+    Assertions.assertFalse(prefixMatcher.match(element("cn.ab.Cls", "m")));
+  }
+
+  /**
+   * 显式工厂方法的 Class 重载与对应的 String 重载等价——这是原来"两个入口语义不一致"的地方。
+   */
+  @Test
+  void testExplicitFactoryMethodsWithClass() {
+    Class<?> clazz = IdentifierMatcherFactoryParseTest.class;
+
+    IdentifierMatcher classMatcher = IdentifierMatcherFactory.classMatcher(clazz);
+    Assertions.assertEquals(ClassNameMatcher.class, classMatcher.getClass());
+    Assertions.assertTrue(classMatcher.match(element(clazz.getName(), "anyMethod")));
+    Assertions.assertFalse(classMatcher.match(element(clazz.getName() + "2", "anyMethod")));
+
+    IdentifierMatcher classAndMethodMatcher = IdentifierMatcherFactory.classAndMethodMatcher(clazz, "m");
+    Assertions.assertEquals(ClassNameAndMethodNameMatcher.class, classAndMethodMatcher.getClass());
+    Assertions.assertTrue(classAndMethodMatcher.match(element(clazz.getName(), "m")));
+    Assertions.assertFalse(classAndMethodMatcher.match(element(clazz.getName(), "other")));
+
+    // prefixMatcher(Class) 覆盖该类及其内部类
+    IdentifierMatcher prefixMatcher = IdentifierMatcherFactory.prefixMatcher(clazz);
+    Assertions.assertEquals(ClassNamePrefixMatcher.class, prefixMatcher.getClass());
+    Assertions.assertTrue(prefixMatcher.match(element(clazz.getName(), "anyMethod")));
+    Assertions.assertTrue(prefixMatcher.match(element(clazz.getName() + "$Inner", "anyMethod")));
   }
 
   @Test
