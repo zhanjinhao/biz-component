@@ -27,6 +27,11 @@ public class StackTraceUtils {
 
   private static final char BOM = 0xFEFF;
 
+  /**
+   * 注释行前缀。类名、方法名都取不到 {@code --}，所以用它做注释不会和标识冲突。
+   */
+  private static final String COMMENT_PREFIX = "--";
+
   static {
     Set<IdentifierMatcher> identifierMatchers = new HashSet<>();
     try {
@@ -48,10 +53,17 @@ public class StackTraceUtils {
 
   /**
    * 读取排除清单，一行一个标识（格式见 {@link IdentifierMatcherFactory#getIdentifierMatcher(String)}）。
+   * <p>下面是排除清单的示例，{@code --} 开头的行为注释：
+   * <pre>
+   *   -- 跳过 NamedFunction 内部的栈帧，让调用方拿到业务方法
+   *   #cn.addenda.component.common.lambda.named.NamedFunction
+   *   #cn.addenda.component.common.util.RetryUtils#retry
+   * </pre>
    * <p>按 UTF-8 解码，并且会做归一化处理，避免生成"永远匹配不上"的 matcher：
    * <ul>
    *   <li>剔除行首的 UTF-8 BOM（U+FEFF），例如 Windows 记事本另存 UTF-8 时会写入 BOM；</li>
-   *   <li>剔除行首行尾的空白字符，空行（含纯空白行）直接跳过。</li>
+   *   <li>剔除行首行尾的空白字符，空行（含纯空白行）直接跳过；</li>
+   *   <li>{@code --} 开头的行是注释，直接跳过。</li>
    * </ul>
    * <p>注意：本方法不关闭入参 {@code inputStream}，由调用方负责关闭。
    *
@@ -64,7 +76,7 @@ public class StackTraceUtils {
     String line;
     while ((line = bufferedReader.readLine()) != null) {
       String identifier = normalize(line);
-      if (identifier.isEmpty()) {
+      if (identifier.isEmpty() || identifier.startsWith(COMMENT_PREFIX)) {
         continue;
       }
       identifierMatchers.add(IdentifierMatcherFactory.getIdentifierMatcher(identifier));

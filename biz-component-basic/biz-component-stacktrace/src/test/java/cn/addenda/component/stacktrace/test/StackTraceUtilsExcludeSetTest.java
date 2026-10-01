@@ -15,7 +15,7 @@ import java.util.Set;
 
 /**
  * {@link StackTraceUtils#readExcludeSet(InputStream)} 的排除清单读取用例。
- * <p>重点覆盖"会静默生成永不匹配 matcher"的输入：UTF-8 BOM、行首行尾空白、空行。
+ * <p>重点覆盖"会静默生成永不匹配 matcher"的输入：UTF-8 BOM、行首行尾空白、空行、{@code --} 注释行。
  * 这些情况下 matcher 一旦读错，排除规则会静默失效，调用方拿到的是框架内部栈帧。
  */
 class StackTraceUtilsExcludeSetTest {
@@ -75,6 +75,67 @@ class StackTraceUtilsExcludeSetTest {
     Assertions.assertTrue(read("").isEmpty());
     Assertions.assertTrue(read("\n \n\t\n").isEmpty());
     Assertions.assertTrue(read(BOM).isEmpty());
+  }
+
+  /**
+   * {@code --} 开头的行是注释，即使注释里写着合法标识也不能生效。
+   */
+  @Test
+  void testCommentLinesAreSkipped() throws IOException {
+    Set<IdentifierMatcher> excludeSet = read("-- 说明文字\n"
+            + "--\n"
+            + "--#cn.a.CommentOut#myMethod\n"
+            + "--cn.a.CommentOut\n"
+            + "#cn.a.MyClass\n");
+
+    Assertions.assertEquals(1, excludeSet.size());
+    Assertions.assertTrue(matches(excludeSet, "cn.a.MyClass", "m"));
+    Assertions.assertFalse(matches(excludeSet, "cn.a.CommentOut", "m"));
+    Assertions.assertFalse(matches(excludeSet, "cn.a.CommentOut", "myMethod"));
+  }
+
+  /**
+   * 注释前的空白和 BOM 都要先被归一化掉，否则 "  -- x" 会被当成标识解析。
+   */
+  @Test
+  void testCommentWithLeadingWhitespaceOrBom() throws IOException {
+    Set<IdentifierMatcher> excludeSet = read("   -- 前置空白\n" + BOM + "-- BOM\n" + "\t-- Tab\n");
+
+    Assertions.assertTrue(excludeSet.isEmpty(), "excludeSet=" + excludeSet);
+  }
+
+  @Test
+  void testCommentOnlyFileProducesEmptySet() throws IOException {
+    Assertions.assertTrue(read("-- a\n--b\n--\n-- \n").isEmpty());
+  }
+
+  /**
+   * 注释与标识混排时，标识部分照常生效——注释不会"吃掉"后面的内容。
+   */
+  @Test
+  void testCommentsInterleavedWithIdentifiers() throws IOException {
+    Set<IdentifierMatcher> excludeSet = read("-- 文件头说明\n"
+            + "\n"
+            + "#cn.a.MyClass\n"
+            + "  -- 中间说明\n"
+            + "#cn.a.Other#myMethod\n"
+            + "-- 文件尾说明\n");
+
+    Assertions.assertEquals(2, excludeSet.size());
+    Assertions.assertTrue(matches(excludeSet, "cn.a.MyClass", "m"));
+    Assertions.assertTrue(matches(excludeSet, "cn.a.Other", "myMethod"));
+  }
+
+  /**
+   * 只有行首的 {@code --} 才是注释：类名/方法名里不可能出现 {@code --}，
+   * 但 "a--b" 这种前缀标识仍然按标识解析（避免把前缀匹配里的连字符误判成注释）。
+   */
+  @Test
+  void testDashInsideIdentifierIsNotComment() throws IOException {
+    Set<IdentifierMatcher> excludeSet = read("#cn.a.MyClass#my--Method\n");
+
+    Assertions.assertEquals(1, excludeSet.size());
+    Assertions.assertTrue(matches(excludeSet, "cn.a.MyClass", "my--Method"));
   }
 
   /**
