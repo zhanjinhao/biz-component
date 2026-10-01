@@ -37,11 +37,11 @@ class PerformanceTest {
     Object[][] cases = {
         {"() -> default",                (Runnable) () -> StackTraceUtils.getCallerInfo()},
         {"(F,F,F) no-excl",              (Runnable) () -> StackTraceUtils.getCallerInfo(false, false, false)},
-        {"(F,T,F) excl-lambda",          (Runnable) () -> StackTraceUtils.getCallerInfo(false, true, false)},
+        {"(F,T,F) excl-synthetic",          (Runnable) () -> StackTraceUtils.getCallerInfo(false, true, false)},
         {"(F,F,T) excl-anon",            (Runnable) () -> StackTraceUtils.getCallerInfo(false, false, true)},
         {"(F,T,T) excl-both",            (Runnable) () -> StackTraceUtils.getCallerInfo(false, true, true)},
         {"(T,F,F) full-name",            (Runnable) () -> StackTraceUtils.getCallerInfo(true, false, false)},
-        {"(T,T,F) full+excl-lambda",     (Runnable) () -> StackTraceUtils.getCallerInfo(true, true, false)},
+        {"(T,T,F) full+excl-synthetic",     (Runnable) () -> StackTraceUtils.getCallerInfo(true, true, false)},
         {"(T,F,T) full+excl-anon",       (Runnable) () -> StackTraceUtils.getCallerInfo(true, false, true)},
         {"(T,T,T) full+excl-both",       (Runnable) () -> StackTraceUtils.getCallerInfo(true, true, true)},
     };
@@ -80,11 +80,11 @@ class PerformanceTest {
     Object[][] cases = {
         {"() -> default",                (Runnable) () -> StackTraceUtils.getDetailedCallerInfo()},
         {"(F,F,F) no-excl",              (Runnable) () -> StackTraceUtils.getDetailedCallerInfo(false, false, false)},
-        {"(F,T,F) excl-lambda",          (Runnable) () -> StackTraceUtils.getDetailedCallerInfo(false, true, false)},
+        {"(F,T,F) excl-synthetic",          (Runnable) () -> StackTraceUtils.getDetailedCallerInfo(false, true, false)},
         {"(F,F,T) excl-anon",            (Runnable) () -> StackTraceUtils.getDetailedCallerInfo(false, false, true)},
         {"(F,T,T) excl-both",            (Runnable) () -> StackTraceUtils.getDetailedCallerInfo(false, true, true)},
         {"(T,F,F) full-name",            (Runnable) () -> StackTraceUtils.getDetailedCallerInfo(true, false, false)},
-        {"(T,T,F) full+excl-lambda",     (Runnable) () -> StackTraceUtils.getDetailedCallerInfo(true, true, false)},
+        {"(T,T,F) full+excl-synthetic",     (Runnable) () -> StackTraceUtils.getDetailedCallerInfo(true, true, false)},
         {"(T,F,T) full+excl-anon",       (Runnable) () -> StackTraceUtils.getDetailedCallerInfo(true, false, true)},
         {"(T,T,T) full+excl-both",       (Runnable) () -> StackTraceUtils.getDetailedCallerInfo(true, true, true)},
     };

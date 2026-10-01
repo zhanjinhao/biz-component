@@ -86,4 +86,18 @@ class StackTraceUtilsEdgeCaseTest {
     Assertions.assertTrue(withoutExclusion.contains("$"), withoutExclusion);
     Assertions.assertTrue(withoutExclusion.endsWith("Local#withoutExclusion"), withoutExclusion);
   }
+
+  /**
+   * {@code $} 是合法的 Java 标识符字符，用户完全可能写出 {@code notlambda$method} 这种方法名。
+   * lambda 判定必须用 {@code startsWith("lambda$")}（javac 生成的 lambda 方法体一律以它开头），
+   * 用 {@code contains} 会把这种用户方法当成 lambda 帧一起跳过。
+   */
+  @Test
+  void testMethodNameContainingLambdaIsNotExcluded() {
+    Assertions.assertEquals("StackTraceUtilsEdgeCaseTest#notlambda$method", notlambda$method());
+  }
+
+  private String notlambda$method() {
+    return StackTraceUtils.getCallerInfo(true, true, false);
+  }
 }

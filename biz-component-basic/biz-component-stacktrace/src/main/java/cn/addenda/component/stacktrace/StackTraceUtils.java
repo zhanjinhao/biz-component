@@ -40,6 +40,25 @@ public class StackTraceUtils {
   private static final String COMMENT_PREFIX = "--";
 
   /**
+   * javac 为 lambda 方法体生成的名称前缀，形如 {@code lambda$test2$6}、{@code lambda$new$0}。
+   * <p>这是三类合成方法里<b>唯一会出现在"直接调用方"位置</b>的：用户在 lambda 体里调用工具方法时，
+   * 该 lambda 体就是最内层的候选帧，跳过它才能拿到外层方法。
+   */
+  private static final String LAMBDA_METHOD_PREFIX = "lambda$";
+
+  /**
+   * javac 为"内部类访问外部类私有成员"生成的合成访问器前缀，形如 {@code access$000}。
+   * <p>它永远不会成为返回的帧：访问器下面才是调用它的方法，上面是被访问的私有成员（用户代码），
+   * 两者都比它更靠内层。覆盖它只是为了 {@code ifExcludeSyntheticMethod} 名副其实，实际近乎空操作。
+   */
+  private static final String ACCESSOR_METHOD_PREFIX = "access$";
+
+  /**
+   * javac 为可序列化 lambda 生成的反序列化入口，方法名就是 {@code $deserializeLambda$}。
+   */
+  private static final String DESERIALIZE_LAMBDA_METHOD = "$deserializeLambda$";
+
+  /**
    * 内置排除项：无论排除清单是否存在、是否可读、是否写得对，都要排除 {@link StackTraceUtils} 自己，
    * 否则 {@code getCallerInfo} 返回的是工具类的内部栈帧（例如 {@code StackTraceUtils#determineStackTraceElement}）。
    */
@@ -239,7 +258,9 @@ public class StackTraceUtils {
    * <p>如果 {@code useSimpleClassName} 为 {@code true}，则类名不含包名，只输出简写的类名。
    *
    * @param useSimpleClassName             true 表示简写类名（仅类名，不含包路径），false 表示全限定名
-   * @param ifExcludeLambda                true 则跳过 lambda 表达式生成的栈帧
+   * @param ifExcludeSyntheticMethod       true 则跳过 javac 生成的合成方法栈帧
+   *                                       （lambda 方法体 {@code lambda$foo$0}、合成访问器 {@code access$000}、
+   *                                       {@code $deserializeLambda$}，见 {@link #isSyntheticMethodName(String)}）
    * @param ifExcludeAnonymousOrLocalClass true 则跳过匿名内部类<b>和局部类</b>的栈帧
    *                                       （两者都是编译器生成的类名：{@code Outer$1} / {@code Outer$1Local}）
    * @param excludes                       额外需要排除的类/方法标识（格式见 {@link IdentifierMatcherFactory}）
@@ -247,8 +268,8 @@ public class StackTraceUtils {
    * @see #getDetailedCallerInfo(boolean, boolean, boolean, String...)
    */
   public static String getCallerInfo(
-          boolean useSimpleClassName, boolean ifExcludeLambda, boolean ifExcludeAnonymousOrLocalClass, String... excludes) {
-    StackTraceElement stackTraceElement = determineStackTraceElement(ifExcludeLambda, ifExcludeAnonymousOrLocalClass, excludes);
+          boolean useSimpleClassName, boolean ifExcludeSyntheticMethod, boolean ifExcludeAnonymousOrLocalClass, String... excludes) {
+    StackTraceElement stackTraceElement = determineStackTraceElement(ifExcludeSyntheticMethod, ifExcludeAnonymousOrLocalClass, excludes);
     String className = stackTraceElement.getClassName();
     String methodName = stackTraceElement.getMethodName();
     if (useSimpleClassName) {
@@ -257,8 +278,8 @@ public class StackTraceUtils {
     return className + "#" + methodName;
   }
 
-  public static String getCallerInfo(boolean useSimpleClassName, boolean ifExcludeLambda, boolean ifExcludeAnonymousOrLocalClass) {
-    return getCallerInfo(useSimpleClassName, ifExcludeLambda, ifExcludeAnonymousOrLocalClass, (String[]) null);
+  public static String getCallerInfo(boolean useSimpleClassName, boolean ifExcludeSyntheticMethod, boolean ifExcludeAnonymousOrLocalClass) {
+    return getCallerInfo(useSimpleClassName, ifExcludeSyntheticMethod, ifExcludeAnonymousOrLocalClass, (String[]) null);
   }
 
   public static String getCallerInfo() {
@@ -275,7 +296,9 @@ public class StackTraceUtils {
    * <p>如果 {@code useSimpleClassName} 为 {@code true}，则类名不含包名，只输出简写的类名。
    *
    * @param useSimpleClassName             true 表示简写类名（仅类名，不含包路径），false 表示全限定名
-   * @param ifExcludeLambda                true 则跳过 lambda 表达式生成的栈帧
+   * @param ifExcludeSyntheticMethod       true 则跳过 javac 生成的合成方法栈帧
+   *                                       （lambda 方法体 {@code lambda$foo$0}、合成访问器 {@code access$000}、
+   *                                       {@code $deserializeLambda$}，见 {@link #isSyntheticMethodName(String)}）
    * @param ifExcludeAnonymousOrLocalClass true 则跳过匿名内部类<b>和局部类</b>的栈帧
    *                                       （两者都是编译器生成的类名：{@code Outer$1} / {@code Outer$1Local}）
    * @param excludes                       额外需要排除的类/方法标识（格式见 {@link IdentifierMatcherFactory}）
@@ -283,8 +306,8 @@ public class StackTraceUtils {
    * @see #getCallerInfo(boolean, boolean, boolean, String...)
    */
   public static String getDetailedCallerInfo(
-          boolean useSimpleClassName, boolean ifExcludeLambda, boolean ifExcludeAnonymousOrLocalClass, String... excludes) {
-    StackTraceElement stackTraceElement = determineStackTraceElement(ifExcludeLambda, ifExcludeAnonymousOrLocalClass, excludes);
+          boolean useSimpleClassName, boolean ifExcludeSyntheticMethod, boolean ifExcludeAnonymousOrLocalClass, String... excludes) {
+    StackTraceElement stackTraceElement = determineStackTraceElement(ifExcludeSyntheticMethod, ifExcludeAnonymousOrLocalClass, excludes);
     String className = stackTraceElement.getClassName();
     String fileName = stackTraceElement.getFileName();
     int lineNumber = stackTraceElement.getLineNumber();
@@ -296,8 +319,8 @@ public class StackTraceUtils {
   }
 
   public static String getDetailedCallerInfo(
-          boolean useSimpleClassName, boolean ifExcludeLambda, boolean ifExcludeAnonymousOrLocalClass) {
-    return getDetailedCallerInfo(useSimpleClassName, ifExcludeLambda, ifExcludeAnonymousOrLocalClass, (String[]) null);
+          boolean useSimpleClassName, boolean ifExcludeSyntheticMethod, boolean ifExcludeAnonymousOrLocalClass) {
+    return getDetailedCallerInfo(useSimpleClassName, ifExcludeSyntheticMethod, ifExcludeAnonymousOrLocalClass, (String[]) null);
   }
 
   public static String getDetailedCallerInfo() {
@@ -309,7 +332,7 @@ public class StackTraceUtils {
   }
 
   private static StackTraceElement determineStackTraceElement(
-          boolean ifExcludeLambda, boolean ifExcludeAnonymousOrLocalClass, String... excludes) {
+          boolean ifExcludeSyntheticMethod, boolean ifExcludeAnonymousOrLocalClass, String... excludes) {
     Set<IdentifierMatcher> excludeSet = getDefaultExcludeSet();
     if (excludes != null) {
       excludeSet = new HashSet<>(excludeSet);
@@ -319,18 +342,18 @@ public class StackTraceUtils {
         }
       }
     }
-    return determineStackTraceElement(new Throwable().getStackTrace(), excludeSet, ifExcludeLambda, ifExcludeAnonymousOrLocalClass);
+    return determineStackTraceElement(new Throwable().getStackTrace(), excludeSet, ifExcludeSyntheticMethod, ifExcludeAnonymousOrLocalClass);
   }
 
   private static StackTraceElement determineStackTraceElement(
           StackTraceElement[] stackTraceElements, Set<IdentifierMatcher> excludeSet,
-          boolean ifExcludeLambda, boolean ifExcludeAnonymousOrLocalClass) {
+          boolean ifExcludeSyntheticMethod, boolean ifExcludeAnonymousOrLocalClass) {
     if (stackTraceElements == null || stackTraceElements.length == 0) {
       throw new IllegalArgumentException("The arg `stackTraceElements` can not null and can not be empty.");
     }
     for (StackTraceElement stackTraceElement : stackTraceElements) {
       String methodName = stackTraceElement.getMethodName();
-      if (ifExcludeLambda && methodName.contains("lambda$")) {
+      if (ifExcludeSyntheticMethod && isSyntheticMethodName(methodName)) {
         continue;
       }
       String className = stackTraceElement.getClassName();
@@ -375,6 +398,40 @@ public class StackTraceUtils {
 
   private static String extractSimpleClassName(String className) {
     return className.substring(className.lastIndexOf('.') + 1);
+  }
+
+  /**
+   * 判断方法名是不是 javac 生成的合成方法。合成方法的栈帧对"谁调用了工具方法"没有信息量，应当跳过。
+   * <p>覆盖三类：
+   * <ul>
+   *   <li>{@code lambda$<外层方法名>$<序号>} —— lambda 方法体，如 {@code lambda$test2$6}；</li>
+   *   <li>{@code access$<数字>} —— 内部类访问外部类私有成员的合成访问器，如 {@code access$000}；</li>
+   *   <li>{@code $deserializeLambda$} —— 可序列化 lambda 的反序列化入口。</li>
+   * </ul>
+   * 判定按 javac 的命名规则来，而不是简单的包含关系：{@code $} 是合法的 Java 标识符字符，
+   * 用户完全可以写出 {@code notlambda$method}、{@code access$control} 这类方法名，它们必须按正常方法对待。
+   *
+   * @param methodName 栈帧的方法名
+   * @return javac 生成的合成方法返回 true
+   */
+  public static boolean isSyntheticMethodName(String methodName) {
+    if (methodName.startsWith(LAMBDA_METHOD_PREFIX) || methodName.equals(DESERIALIZE_LAMBDA_METHOD)) {
+      return true;
+    }
+    // access$000：前缀后面必须至少有一位数字且全是数字，避免误伤 access$、access$control 这类用户方法
+    if (methodName.startsWith(ACCESSOR_METHOD_PREFIX)) {
+      int digitsStart = ACCESSOR_METHOD_PREFIX.length();
+      if (digitsStart == methodName.length()) {
+        return false;
+      }
+      for (int i = digitsStart; i < methodName.length(); i++) {
+        if (!Character.isDigit(methodName.charAt(i))) {
+          return false;
+        }
+      }
+      return true;
+    }
+    return false;
   }
 
   /**
