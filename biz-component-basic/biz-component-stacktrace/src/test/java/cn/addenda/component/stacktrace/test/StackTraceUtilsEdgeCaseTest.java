@@ -59,4 +59,31 @@ class StackTraceUtilsEdgeCaseTest {
     }.invoke();
     Assertions.assertFalse(result.contains("$"));
   }
+
+  /**
+   * 局部类（javac 命名 {@code Outer$1Local}）也会被 {@code ifExcludeAnonymousOrLocalClass} 跳过。
+   * <p>该开关覆盖"局部类 + 匿名类"两类：它们都是编译器生成的类名，调用方要的是外层方法。
+   * 这里把行为固定下来，避免以后被"修正"成只看 {@code $1}（那样局部类的帧会冒出来）。
+   */
+  @Test
+  void testLocalClassIsExcludedToo() {
+    class Local {
+      String withExclusion() {
+        return StackTraceUtils.getCallerInfo(true, false, true);
+      }
+
+      String withoutExclusion() {
+        return StackTraceUtils.getCallerInfo(true, false, false);
+      }
+    }
+    Local local = new Local();
+
+    // 开：跳过局部类帧，返回外层方法
+    Assertions.assertEquals("StackTraceUtilsEdgeCaseTest#testLocalClassIsExcludedToo", local.withExclusion());
+
+    // 关：如实返回局部类帧，类名形如 StackTraceUtilsEdgeCaseTest$1Local
+    String withoutExclusion = local.withoutExclusion();
+    Assertions.assertTrue(withoutExclusion.contains("$"), withoutExclusion);
+    Assertions.assertTrue(withoutExclusion.endsWith("Local#withoutExclusion"), withoutExclusion);
+  }
 }

@@ -238,16 +238,17 @@ public class StackTraceUtils {
    * 获取调用者信息，返回格式：{@code ClassName#MethodName}
    * <p>如果 {@code useSimpleClassName} 为 {@code true}，则类名不含包名，只输出简写的类名。
    *
-   * @param useSimpleClassName           true 表示简写类名（仅类名，不含包路径），false 表示全限定名
-   * @param ifExcludeLambda              true 则跳过 lambda 表达式生成的栈帧
-   * @param ifExcludeAnonymousInnerClass true 则跳过匿名内部类的栈帧
-   * @param excludes                     额外需要排除的类/方法标识（格式见 {@link IdentifierMatcherFactory}）
+   * @param useSimpleClassName             true 表示简写类名（仅类名，不含包路径），false 表示全限定名
+   * @param ifExcludeLambda                true 则跳过 lambda 表达式生成的栈帧
+   * @param ifExcludeAnonymousOrLocalClass true 则跳过匿名内部类<b>和局部类</b>的栈帧
+   *                                       （两者都是编译器生成的类名：{@code Outer$1} / {@code Outer$1Local}）
+   * @param excludes                       额外需要排除的类/方法标识（格式见 {@link IdentifierMatcherFactory}）
    * @return 调用者信息，格式：{@code ClassName#MethodName}
    * @see #getDetailedCallerInfo(boolean, boolean, boolean, String...)
    */
   public static String getCallerInfo(
-          boolean useSimpleClassName, boolean ifExcludeLambda, boolean ifExcludeAnonymousInnerClass, String... excludes) {
-    StackTraceElement stackTraceElement = determineStackTraceElement(ifExcludeLambda, ifExcludeAnonymousInnerClass, excludes);
+          boolean useSimpleClassName, boolean ifExcludeLambda, boolean ifExcludeAnonymousOrLocalClass, String... excludes) {
+    StackTraceElement stackTraceElement = determineStackTraceElement(ifExcludeLambda, ifExcludeAnonymousOrLocalClass, excludes);
     String className = stackTraceElement.getClassName();
     String methodName = stackTraceElement.getMethodName();
     if (useSimpleClassName) {
@@ -256,8 +257,8 @@ public class StackTraceUtils {
     return className + "#" + methodName;
   }
 
-  public static String getCallerInfo(boolean useSimpleClassName, boolean ifExcludeLambda, boolean ifExcludeAnonymousInnerClass) {
-    return getCallerInfo(useSimpleClassName, ifExcludeLambda, ifExcludeAnonymousInnerClass, (String[]) null);
+  public static String getCallerInfo(boolean useSimpleClassName, boolean ifExcludeLambda, boolean ifExcludeAnonymousOrLocalClass) {
+    return getCallerInfo(useSimpleClassName, ifExcludeLambda, ifExcludeAnonymousOrLocalClass, (String[]) null);
   }
 
   public static String getCallerInfo() {
@@ -273,16 +274,17 @@ public class StackTraceUtils {
    * <p>相比 {@link #getCallerInfo}，额外包含文件名和行号，可精确到代码行。
    * <p>如果 {@code useSimpleClassName} 为 {@code true}，则类名不含包名，只输出简写的类名。
    *
-   * @param useSimpleClassName           true 表示简写类名（仅类名，不含包路径），false 表示全限定名
-   * @param ifExcludeLambda              true 则跳过 lambda 表达式生成的栈帧
-   * @param ifExcludeAnonymousInnerClass true 则跳过匿名内部类的栈帧
-   * @param excludes                     额外需要排除的类/方法标识（格式见 {@link IdentifierMatcherFactory}）
+   * @param useSimpleClassName             true 表示简写类名（仅类名，不含包路径），false 表示全限定名
+   * @param ifExcludeLambda                true 则跳过 lambda 表达式生成的栈帧
+   * @param ifExcludeAnonymousOrLocalClass true 则跳过匿名内部类<b>和局部类</b>的栈帧
+   *                                       （两者都是编译器生成的类名：{@code Outer$1} / {@code Outer$1Local}）
+   * @param excludes                       额外需要排除的类/方法标识（格式见 {@link IdentifierMatcherFactory}）
    * @return 详细的调用者信息，格式：{@code ClassName#MethodName of FileName:LineNumber}
    * @see #getCallerInfo(boolean, boolean, boolean, String...)
    */
   public static String getDetailedCallerInfo(
-          boolean useSimpleClassName, boolean ifExcludeLambda, boolean ifExcludeAnonymousInnerClass, String... excludes) {
-    StackTraceElement stackTraceElement = determineStackTraceElement(ifExcludeLambda, ifExcludeAnonymousInnerClass, excludes);
+          boolean useSimpleClassName, boolean ifExcludeLambda, boolean ifExcludeAnonymousOrLocalClass, String... excludes) {
+    StackTraceElement stackTraceElement = determineStackTraceElement(ifExcludeLambda, ifExcludeAnonymousOrLocalClass, excludes);
     String className = stackTraceElement.getClassName();
     String fileName = stackTraceElement.getFileName();
     int lineNumber = stackTraceElement.getLineNumber();
@@ -294,8 +296,8 @@ public class StackTraceUtils {
   }
 
   public static String getDetailedCallerInfo(
-          boolean useSimpleClassName, boolean ifExcludeLambda, boolean ifExcludeAnonymousInnerClass) {
-    return getDetailedCallerInfo(useSimpleClassName, ifExcludeLambda, ifExcludeAnonymousInnerClass, (String[]) null);
+          boolean useSimpleClassName, boolean ifExcludeLambda, boolean ifExcludeAnonymousOrLocalClass) {
+    return getDetailedCallerInfo(useSimpleClassName, ifExcludeLambda, ifExcludeAnonymousOrLocalClass, (String[]) null);
   }
 
   public static String getDetailedCallerInfo() {
@@ -307,7 +309,7 @@ public class StackTraceUtils {
   }
 
   private static StackTraceElement determineStackTraceElement(
-          boolean ifExcludeLambda, boolean ifExcludeAnonymousInnerClass, String... excludes) {
+          boolean ifExcludeLambda, boolean ifExcludeAnonymousOrLocalClass, String... excludes) {
     Set<IdentifierMatcher> excludeSet = getDefaultExcludeSet();
     if (excludes != null) {
       excludeSet = new HashSet<>(excludeSet);
@@ -317,12 +319,12 @@ public class StackTraceUtils {
         }
       }
     }
-    return determineStackTraceElement(new Throwable().getStackTrace(), excludeSet, ifExcludeLambda, ifExcludeAnonymousInnerClass);
+    return determineStackTraceElement(new Throwable().getStackTrace(), excludeSet, ifExcludeLambda, ifExcludeAnonymousOrLocalClass);
   }
 
   private static StackTraceElement determineStackTraceElement(
           StackTraceElement[] stackTraceElements, Set<IdentifierMatcher> excludeSet,
-          boolean ifExcludeLambda, boolean ifExcludeAnonymousInnerClass) {
+          boolean ifExcludeLambda, boolean ifExcludeAnonymousOrLocalClass) {
     if (stackTraceElements == null || stackTraceElements.length == 0) {
       throw new IllegalArgumentException("The arg `stackTraceElements` can not null and can not be empty.");
     }
@@ -332,7 +334,7 @@ public class StackTraceUtils {
         continue;
       }
       String className = stackTraceElement.getClassName();
-      if (ifExcludeAnonymousInnerClass && isAnonymousInnerClass(className)) {
+      if (ifExcludeAnonymousOrLocalClass && isAnonymousOrLocalClass(className)) {
         continue;
       }
       boolean flag = IdentifierMatcherFactory.match(excludeSet, stackTraceElement);
@@ -375,7 +377,18 @@ public class StackTraceUtils {
     return className.substring(className.lastIndexOf('.') + 1);
   }
 
-  private static boolean isAnonymousInnerClass(String className) {
+  /**
+   * 判断这个类名是不是编译器为"局部类 / 匿名类"生成的。
+   * <p>javac 的命名规则：类名里出现 {@code $} + 数字，这一段的数字是编译器给的序号。
+   * <ul>
+   *   <li>匿名类：{@code Outer$1}；</li>
+   *   <li>局部类（方法体里声明的类）：{@code Outer$1Local}，数字后面才是类名；</li>
+   *   <li>具名内部类：{@code Outer$Inner}，不含数字，<b>不算</b>。</li>
+   * </ul>
+   * 所以本方法判定的是"局部类 + 匿名类"这个集合，{@code ifExcludeAnonymousOrLocalClass} 用的就是这个语义：
+   * 两者都是编译器生成的类名，它们的栈帧对"谁调用了工具方法"没有信息量，调用方真正想要的是外层方法。
+   */
+  private static boolean isAnonymousOrLocalClass(String className) {
     for (int i = 0; i < className.length() - 1; i++) {
       if (className.charAt(i) == '$' && Character.isDigit(className.charAt(i + 1))) {
         return true;
