@@ -1,6 +1,6 @@
 package cn.addenda.component.common.util.datetime;
 
-import cn.addenda.component.common.util.string.Slf4jUtils;
+import cn.addenda.component.common.util.string.MessageUtils;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -84,17 +84,17 @@ public class WeekScheduleUtils {
 
   private static void assertWeekSchedule(String weekSchedule) {
     if (weekSchedule == null || weekSchedule.isEmpty()) {
-      throw new IllegalArgumentException(Slf4jUtils.format("班期[{}]格式错误", weekSchedule));
+      throw new IllegalArgumentException(MessageUtils.format("班期[{}]格式错误", weekSchedule));
     }
     int length = weekSchedule.length();
     Set<Character> seen = new HashSet<>();
     for (int i = 0; i < length; i++) {
       char c = weekSchedule.charAt(i);
       if (c < '1' || c > '7') {
-        throw new IllegalArgumentException(Slf4jUtils.format("班期[{}]格式错误", weekSchedule));
+        throw new IllegalArgumentException(MessageUtils.format("班期[{}]格式错误", weekSchedule));
       }
       if (!seen.add(c)) {
-        throw new IllegalArgumentException(Slf4jUtils.format("班期[{}]格式错误", weekSchedule));
+        throw new IllegalArgumentException(MessageUtils.format("班期[{}]格式错误", weekSchedule));
       }
     }
   }

@@ -1,6 +1,6 @@
 package cn.addenda.component.common.util;
 
-import cn.addenda.component.common.util.string.Slf4jUtils;
+import cn.addenda.component.common.util.string.MessageUtils;
 import cn.addenda.component.common.util.string.StringUtils;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -35,7 +35,7 @@ public class UrlUtils {
     try {
       return URLEncoder.encode(str, StandardCharsets.UTF_8.name());
     } catch (UnsupportedEncodingException e) {
-      throw new IllegalArgumentException(Slf4jUtils.format("无法使用编码 [{}] 对 [{}] 进行 URL 编码", "UTF-8", StringUtils.atMost(str, 1000)), e);
+      throw new IllegalArgumentException(MessageUtils.format("无法使用编码 [{}] 对 [{}] 进行 URL 编码", "UTF-8", StringUtils.atMost(str, 1000)), e);
     }
   }
 
@@ -51,7 +51,7 @@ public class UrlUtils {
     try {
       return URLDecoder.decode(str, StandardCharsets.UTF_8.name());
     } catch (UnsupportedEncodingException e) {
-      throw new IllegalArgumentException(Slf4jUtils.format("无法使用编码 [{}] 对 [{}] 进行 URL 解码", "UTF-8", StringUtils.atMost(str, 1000)), e);
+      throw new IllegalArgumentException(MessageUtils.format("无法使用编码 [{}] 对 [{}] 进行 URL 解码", "UTF-8", StringUtils.atMost(str, 1000)), e);
     }
   }
 
@@ -70,7 +70,7 @@ public class UrlUtils {
     try {
       return URLEncoder.encode(str, encoding);
     } catch (UnsupportedEncodingException e) {
-      throw new IllegalArgumentException(Slf4jUtils.format("无法使用编码 [{}] 对 [{}] 进行 URL 编码", encoding, StringUtils.atMost(str, 1000)), e);
+      throw new IllegalArgumentException(MessageUtils.format("无法使用编码 [{}] 对 [{}] 进行 URL 编码", encoding, StringUtils.atMost(str, 1000)), e);
     }
   }
 
@@ -89,7 +89,7 @@ public class UrlUtils {
     try {
       return URLDecoder.decode(str, encoding);
     } catch (UnsupportedEncodingException e) {
-      throw new IllegalArgumentException(Slf4jUtils.format("无法使用编码 [{}] 对 [{}] 进行 URL 解码", encoding, StringUtils.atMost(str, 1000)), e);
+      throw new IllegalArgumentException(MessageUtils.format("无法使用编码 [{}] 对 [{}] 进行 URL 解码", encoding, StringUtils.atMost(str, 1000)), e);
     }
   }
 

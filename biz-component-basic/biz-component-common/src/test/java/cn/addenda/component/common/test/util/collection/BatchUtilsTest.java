@@ -5,7 +5,7 @@ import cn.addenda.component.common.lambda.ExceptionFunction;
 import cn.addenda.component.common.util.collection.ArrayUtils;
 import cn.addenda.component.common.util.collection.BatchUtils;
 import cn.addenda.component.common.util.collection.IterableUtils;
-import cn.addenda.component.common.util.string.Slf4jUtils;
+import cn.addenda.component.common.util.string.MessageUtils;
 import cn.addenda.component.stacktrace.StackTraceUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
@@ -24,7 +24,7 @@ class BatchUtilsTest {
   @Test
   void testList1() {
     BatchUtils.acceptListInBatches(Arrays.asList(1, 2, 3, 4, 5),
-            objects -> Assertions.assertEquals("[1, 2, 3, 4, 5]", Slf4jUtils.format("{}", objects)));
+            objects -> Assertions.assertEquals("[1, 2, 3, 4, 5]", MessageUtils.format("{}", objects)));
   }
 
   @Test
@@ -37,7 +37,7 @@ class BatchUtilsTest {
   @Test
   void testList3() {
     BatchUtils.acceptListInBatches(Arrays.asList(1, 2, 3, 4, 5),
-            objects -> Assertions.assertEquals("[1, 2, 3, 4, 5]", Slf4jUtils.format("{}", objects)),
+            objects -> Assertions.assertEquals("[1, 2, 3, 4, 5]", MessageUtils.format("{}", objects)),
             StackTraceUtils.getDetailedCallerInfo());
   }
 
@@ -73,7 +73,7 @@ class BatchUtilsTest {
   @Test
   void test1() {
     BatchUtils.acceptInBatches(Arrays.asList(1, 2, 3, 4, 5),
-            objects -> Assertions.assertEquals("[1, 2, 3, 4, 5]", Slf4jUtils.format("{}", objects)));
+            objects -> Assertions.assertEquals("[1, 2, 3, 4, 5]", MessageUtils.format("{}", objects)));
   }
 
   @Test
@@ -86,7 +86,7 @@ class BatchUtilsTest {
   @Test
   void test3() {
     BatchUtils.acceptInBatches(Arrays.asList(1, 2, 3, 4, 5),
-            objects -> Assertions.assertEquals("[1, 2, 3, 4, 5]", Slf4jUtils.format("{}", objects)),
+            objects -> Assertions.assertEquals("[1, 2, 3, 4, 5]", MessageUtils.format("{}", objects)),
             StackTraceUtils.getDetailedCallerInfo());
   }
 
@@ -298,7 +298,7 @@ class BatchUtilsTest {
   @Test
   void testList1E() throws Exception {
     BatchUtils.acceptListInBatchesE(Arrays.asList(1, 2, 3, 4, 5),
-            objects -> Assertions.assertEquals("[1, 2, 3, 4, 5]", Slf4jUtils.format("{}", objects)));
+            objects -> Assertions.assertEquals("[1, 2, 3, 4, 5]", MessageUtils.format("{}", objects)));
   }
 
   @Test
@@ -311,7 +311,7 @@ class BatchUtilsTest {
   @Test
   void testList3E() throws Exception {
     BatchUtils.acceptListInBatchesE(Arrays.asList(1, 2, 3, 4, 5),
-            objects -> Assertions.assertEquals("[1, 2, 3, 4, 5]", Slf4jUtils.format("{}", objects)),
+            objects -> Assertions.assertEquals("[1, 2, 3, 4, 5]", MessageUtils.format("{}", objects)),
             StackTraceUtils.getDetailedCallerInfo());
   }
 
@@ -347,7 +347,7 @@ class BatchUtilsTest {
   @Test
   void test1E() throws Exception {
     BatchUtils.acceptInBatchesE(Arrays.asList(1, 2, 3, 4, 5),
-            objects -> Assertions.assertEquals("[1, 2, 3, 4, 5]", Slf4jUtils.format("{}", objects)));
+            objects -> Assertions.assertEquals("[1, 2, 3, 4, 5]", MessageUtils.format("{}", objects)));
   }
 
   @Test
@@ -360,7 +360,7 @@ class BatchUtilsTest {
   @Test
   void test3E() throws Exception {
     BatchUtils.acceptInBatchesE(Arrays.asList(1, 2, 3, 4, 5),
-            objects -> Assertions.assertEquals("[1, 2, 3, 4, 5]", Slf4jUtils.format("{}", objects)),
+            objects -> Assertions.assertEquals("[1, 2, 3, 4, 5]", MessageUtils.format("{}", objects)),
             StackTraceUtils.getDetailedCallerInfo());
   }
 

@@ -1,7 +1,7 @@
 package cn.addenda.component.common.util.datetime;
 
 import cn.addenda.component.common.util.collection.ArrayUtils;
-import cn.addenda.component.common.util.string.Slf4jUtils;
+import cn.addenda.component.common.util.string.MessageUtils;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -77,7 +77,7 @@ public class TimeZoneUtils {
 
     if (minutes % QUARTER_HOUR_MINUTES != 0 || Math.abs(minutes) >= 60) {
       throw new IllegalArgumentException(
-              Slf4jUtils.format("minutes must be a multiple of 15. timeZone: {}, hours: {}, minutes: {}.",
+              MessageUtils.format("minutes must be a multiple of 15. timeZone: {}, hours: {}, minutes: {}.",
                       timeZone, hours, minutes));
     }
 
@@ -102,7 +102,7 @@ public class TimeZoneUtils {
       return "Z".equals(id) ? "+00:00" : id;
     } catch (DateTimeException dateTimeException) {
       throw new IllegalArgumentException(
-              Slf4jUtils.format("illegal timeZone offset argument. timeZone: {}, hours: {}, minutes: {}.", timeZone, hours, minutes),
+              MessageUtils.format("illegal timeZone offset argument. timeZone: {}, hours: {}, minutes: {}.", timeZone, hours, minutes),
               dateTimeException);
     }
   }
@@ -242,13 +242,13 @@ public class TimeZoneUtils {
    */
   public static void assertHHmmValid(String time) {
     if (!checkHHmmValid(time)) {
-      throw new IllegalArgumentException(Slf4jUtils.format("HH:mm[{}]格式错误", time));
+      throw new IllegalArgumentException(MessageUtils.format("HH:mm[{}]格式错误", time));
     }
   }
 
   private static void assertTimeZone(String timeZone) {
     if (!timeZoneSet.contains(timeZone)) {
-      throw new IllegalArgumentException(Slf4jUtils.format("时区[{}]格式错误！", timeZone));
+      throw new IllegalArgumentException(MessageUtils.format("时区[{}]格式错误！", timeZone));
     }
   }
 

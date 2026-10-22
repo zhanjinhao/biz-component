@@ -1,6 +1,6 @@
 package cn.addenda.component.common.exception;
 
-import cn.addenda.component.common.util.string.Slf4jUtils;
+import cn.addenda.component.common.util.string.MessageUtils;
 import lombok.Getter;
 
 /**
@@ -56,7 +56,7 @@ public class SystemException extends RuntimeException {
   }
 
   public static SystemException unExpectedException(String message) {
-    return new SystemException(Slf4jUtils.format("unExpected exception: [{}].", message));
+    return new SystemException(MessageUtils.format("unExpected exception: [{}].", message));
   }
 
   @Override

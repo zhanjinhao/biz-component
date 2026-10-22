@@ -1,7 +1,7 @@
 package cn.addenda.component.common.lambda.costed;
 
 import cn.addenda.component.common.util.datetime.DateUtils;
-import cn.addenda.component.common.util.string.Slf4jUtils;
+import cn.addenda.component.common.util.string.MessageUtils;
 import lombok.Getter;
 import org.slf4j.Logger;
 
@@ -98,12 +98,12 @@ public abstract class AbstractCostedFunction {
     long runCost = DateUtils.localDateTimeToTimestamp(endDateTime) - DateUtils.localDateTimeToTimestamp(startDateTime);
     Supplier<String> msgSupplier;
     if (queueSize == null) {
-      msgSupplier = () -> Slf4jUtils.format(
+      msgSupplier = () -> MessageUtils.format(
               "{}[{}]: createDateTime[{}], endDateTime[{}], totalCost[{}ms]. ",
               functionType, functionName, DateUtils.format(createDateTime, DateUtils.yMdHmsS_FMT),
               DateUtils.format(endDateTime, DateUtils.yMdHmsS_FMT), totalCost);
     } else {
-      msgSupplier = () -> Slf4jUtils.format(
+      msgSupplier = () -> MessageUtils.format(
               "{}[{}]: createDateTime[{}], startDateTime[{}], endDateTime[{}], totalCost[{}ms], runCost[{}ms]. The state of the thread pool at the moment the task is submitted: queueSize[{}], poolSize[{}], activeCount[{}].",
               functionType, functionName, DateUtils.format(createDateTime, DateUtils.yMdHmsS_FMT),
               DateUtils.format(startDateTime, DateUtils.yMdHmsS_FMT), DateUtils.format(endDateTime, DateUtils.yMdHmsS_FMT),
