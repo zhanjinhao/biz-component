@@ -677,6 +677,149 @@ class StringUtilsTest {
     Assertions.assertEquals("", StringUtils.atMost("", 5));
   }
 
+  @Test
+  void testAtMost_SplitSurrogatePair() {
+    // A + 高位代理 + 低位代理 + B，截断点落在代理对中间
+    String string = "A😀B";
+    String result = StringUtils.atMost(string, 2);
+    Assertions.assertEquals("A\\uD83D", result);
+    Assertions.assertEquals(2 + 5, result.length());
+  }
+
+  @Test
+  void testAtMost_CompleteSurrogatePair() {
+    String string = "A😀B";
+    Assertions.assertEquals("A😀", StringUtils.atMost(string, 3));
+  }
+
+  // ==================== displayAtMost ====================
+
+  @Test
+  void testDisplayAtMost_Null() {
+    Assertions.assertNull(StringUtils.displayAtMost(null, 5, 2));
+  }
+
+  @Test
+  void testDisplayAtMost_ShorterThanMax() {
+    Assertions.assertEquals("abc", StringUtils.displayAtMost("abc", 10, 2));
+  }
+
+  @Test
+  void testDisplayAtMost_EqualToMax() {
+    Assertions.assertEquals("abc", StringUtils.displayAtMost("abc", 3, 2));
+  }
+
+  @Test
+  void testDisplayAtMost_KeepHeadAndTail() {
+    String result = StringUtils.displayAtMost("0123456789", 7, 3);
+    Assertions.assertEquals("0...789", result);
+    Assertions.assertEquals(7, result.length());
+  }
+
+  @Test
+  void testDisplayAtMost_ZeroMaxLength() {
+    Assertions.assertEquals("", StringUtils.displayAtMost("0123456789", 0, 3));
+  }
+
+  @Test
+  void testDisplayAtMost_NegativeMaxLength() {
+    Assertions.assertEquals("0123456789", StringUtils.displayAtMost("0123456789", -1, 3));
+  }
+
+  @Test
+  void testDisplayAtMost_NegativeTailLengthTreatedAsZero() {
+    String result = StringUtils.displayAtMost("0123456789", 6, -5);
+    Assertions.assertEquals("012...", result);
+    Assertions.assertEquals(6, result.length());
+  }
+
+  @Test
+  void testDisplayAtMost_NoRoomForPrefixFallsBackToAtMost() {
+    Assertions.assertEquals("01234", StringUtils.displayAtMost("0123456789", 5, 3));
+  }
+
+  @Test
+  void testDisplayAtMost_TailLengthEqualsMaxLength() {
+    // prefixLength = 5 - 3 - 5 < 0，退化为只保留开头
+    Assertions.assertEquals("01234", StringUtils.displayAtMost("0123456789", 5, 5));
+  }
+
+  @Test
+  void testDisplayAtMost_TailLengthGreaterThanMaxLength() {
+    Assertions.assertEquals("01234", StringUtils.displayAtMost("0123456789", 5, 999));
+  }
+
+  @Test
+  void testDisplayAtMost_TailLengthGreaterThanMaxLength_CustomEllipsis() {
+    Assertions.assertEquals("01234", StringUtils.displayAtMost("0123456789", 5, "~", 999));
+  }
+
+  @Test
+  void testDisplayAtMost_ShortTextWithTailLengthGreaterThanMaxLength() {
+    // 文本本身没超过上限，tailLength 不参与判断
+    Assertions.assertEquals("abc", StringUtils.displayAtMost("abc", 10, 999));
+  }
+
+  @Test
+  void testDisplayAtMost_PrefixBoundary() {
+    // prefixLength = 8 - 3 - 4 = 1，正常保留头尾
+    Assertions.assertEquals("0...6789", StringUtils.displayAtMost("0123456789", 8, 4));
+    // prefixLength = 8 - 3 - 5 = 0，退化为只保留开头
+    Assertions.assertEquals("01234567", StringUtils.displayAtMost("0123456789", 8, 5));
+  }
+
+  @Test
+  void testDisplayAtMost_CustomEllipsis() {
+    Assertions.assertEquals("012~89", StringUtils.displayAtMost("0123456789", 6, "~", 2));
+  }
+
+  @Test
+  void testDisplayAtMost_NullEllipsis() {
+    Assertions.assertThrows(IllegalArgumentException.class,
+            () -> StringUtils.displayAtMost("0123456789", 6, null, 2));
+  }
+
+  @Test
+  void testDisplayAtMost_EmptyString() {
+    Assertions.assertEquals("", StringUtils.displayAtMost("", 5, 2));
+  }
+
+  @Test
+  void testDisplayAtMost_SurrogatePairNotSplit() {
+    String display = "ab😀cdefghij";
+    Assertions.assertEquals("ab😀...j", StringUtils.displayAtMost(display, 8, 1));
+  }
+
+  @Test
+  void testDisplayAtMost_PrefixSplitSurrogatePair() {
+    String display = "ab😀cdefghij";
+    String result = StringUtils.displayAtMost(display, 7, 1);
+    Assertions.assertEquals("ab\\uD83D...j", result);
+    Assertions.assertEquals(7 + 5, result.length());
+  }
+
+  @Test
+  void testDisplayAtMost_TailSplitSurrogatePair() {
+    String display = "abcdefgh😀ij";
+    String result = StringUtils.displayAtMost(display, 8, 3);
+    Assertions.assertEquals("ab...\\uDE00ij", result);
+    Assertions.assertEquals(8 + 5, result.length());
+  }
+
+  @Test
+  void testDisplayAtMost_BothBoundariesSplitSurrogatePair() {
+    String display = "A😀bcdef😀Z";
+    String result = StringUtils.displayAtMost(display, 7, 2);
+    Assertions.assertEquals("A\\uD83D...\\uDE00Z", result);
+    Assertions.assertEquals(7 + 10, result.length());
+  }
+
+  @Test
+  void testDisplayAtMost_ZeroTailLengthWithPrefixSplit() {
+    String display = "ab😀cdefghij";
+    Assertions.assertEquals("ab\\uD83D...", StringUtils.displayAtMost(display, 6, 0));
+  }
+
   // ==================== joinArrayToString (String[] pieces) ====================
 
   @Test
